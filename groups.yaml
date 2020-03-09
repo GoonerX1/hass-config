@@ -1,0 +1,4 @@
+  household:
+    name: Household Members
+    entities:
+      - person.adrian_chapman

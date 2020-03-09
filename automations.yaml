@@ -1,0 +1,527 @@
+- id: '1580629680844'
+  alias: Hallway Motion On
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.trisensor_hallway_sensor
+    platform: state
+    to: 'on'
+  condition:
+  - condition: and
+    conditions:
+    - below: '5'
+      condition: numeric_state
+      entity_id: sun.sun
+      value_template: '{{state.attributes.elevation}}'
+    - below: '50'
+      condition: numeric_state
+      entity_id: sensor.trisensor_hallway_luminance
+  action:
+  - device_id: 6342ce6f064c434b95b8ecb1d71951ff
+    domain: light
+    entity_id: light.hallway_light
+    type: turn_on
+- id: '1580631052994'
+  alias: 1st Landing Motion On
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.trisensor_1st_landing_sensor
+    from: 'off'
+    platform: state
+    to: 'on'
+  condition:
+  - condition: and
+    conditions:
+    - below: '10'
+      condition: numeric_state
+      entity_id: sun.sun
+      value_template: '{{state.attributes.elevation}}'
+    - below: '100'
+      condition: numeric_state
+      entity_id: sensor.trisensor_1st_landing_luminance
+  action:
+  - device_id: 1724e1f5aab5417288edd443515a6f8d
+    domain: light
+    entity_id: light.1st_landing_light
+    type: turn_on
+- id: '1580660725532'
+  alias: Front door open light on
+  description: ''
+  trigger:
+  - device_id: 4edb227d4b0a43dda0cb93fe877d4eeb
+    domain: binary_sensor
+    entity_id: binary_sensor.openclose_2
+    platform: device
+    type: opened
+  condition:
+  - condition: and
+    conditions:
+    - below: '2'
+      condition: numeric_state
+      entity_id: sun.sun
+      value_template: '{{state.attributes.elevation}}'
+    - condition: state
+      entity_id: light.hallway_light
+      state: 'off'
+  action:
+  - device_id: 6342ce6f064c434b95b8ecb1d71951ff
+    domain: light
+    entity_id: light.hallway_light
+    type: turn_on
+- id: '1580662218243'
+  alias: 1st Landing no Motion Light off
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.trisensor_1st_landing_sensor
+    for: 00:00:30
+    platform: state
+    to: 'off'
+  condition:
+  - condition: device
+    device_id: 1724e1f5aab5417288edd443515a6f8d
+    domain: light
+    entity_id: light.1st_landing_light
+    type: is_on
+  action:
+  - device_id: 1724e1f5aab5417288edd443515a6f8d
+    domain: light
+    entity_id: light.1st_landing_light
+    type: turn_off
+- id: '1580662385610'
+  alias: Arm Blink Cameras When Away
+  description: ''
+  trigger:
+  - entity_id: person.adrian_chapman
+    platform: state
+    to: not_home
+  condition: []
+  action:
+  - entity_id: alarm_control_panel.blink_home
+    service: alarm_control_panel.alarm_arm_away
+- id: '1580662467114'
+  alias: Disarm Blink Cameras When Home
+  description: ''
+  trigger:
+  - entity_id: person.adrian_chapman
+    platform: state
+    to: home
+  condition: []
+  action:
+  - entity_id: alarm_control_panel.blink_home
+    service: alarm_control_panel.alarm_disarm
+- id: '1580663686647'
+  alias: Blink Image Update
+  description: ''
+  trigger:
+  - at: 08:00:00
+    platform: time
+  condition:
+  - condition: time
+    weekday:
+    - sat
+  action:
+  - service: script.1580663632136
+- id: '1580664084018'
+  alias: Front Door Shut Light Off
+  description: ''
+  trigger:
+  - device_id: 4edb227d4b0a43dda0cb93fe877d4eeb
+    domain: binary_sensor
+    entity_id: binary_sensor.openclose_2
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    platform: device
+    type: not_opened
+  condition:
+  - condition: device
+    device_id: 6342ce6f064c434b95b8ecb1d71951ff
+    domain: light
+    entity_id: light.hallway_light
+    type: is_on
+  action:
+  - device_id: 6342ce6f064c434b95b8ecb1d71951ff
+    domain: light
+    entity_id: light.hallway_light
+    type: turn_off
+- id: '1580665959396'
+  alias: Turn on Kitchen Radio AM
+  description: ''
+  trigger:
+  - entity_id: media_player.bedroom_sonos
+    platform: state
+    to: playing
+  condition:
+  - after: 06:10:00
+    before: 06:30:00
+    condition: time
+  action:
+  - data: {}
+    entity_id: script.1581635745828
+    service: script.turn_on
+- id: '1580666301543'
+  alias: Turn on Kitchen Lights AM
+  description: ''
+  trigger:
+  - entity_id: media_player.bedroom_sonos
+    platform: state
+    to: playing
+  condition:
+  - after: 06:10:00
+    before: 06:45:00
+    condition: time
+  - below: '5'
+    condition: numeric_state
+    entity_id: sun.sun
+    value_template: '{{state.attributes.elevation}}'
+  action:
+  - entity_id: script.1580666071205
+    service: script.turn_on
+- id: '1580666423343'
+  alias: Hallway no motion light off
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.trisensor_hallway_sensor
+    for: 00:00:30
+    platform: state
+    to: 'off'
+  condition:
+  - condition: device
+    device_id: 6342ce6f064c434b95b8ecb1d71951ff
+    domain: light
+    entity_id: light.hallway_light
+    type: is_on
+  action:
+  - device_id: 6342ce6f064c434b95b8ecb1d71951ff
+    domain: light
+    entity_id: light.hallway_light
+    type: turn_off
+- id: '1580799177527'
+  alias: Turn off lights when household member not home
+  description: ''
+  trigger:
+  - entity_id: group.household
+    from: home
+    platform: state
+    to: not_home
+  condition:
+  - condition: or
+    conditions:
+    - condition: device
+      device_id: 7fed303bfddf4578b1cc7b2135bfa81b
+      domain: light
+      entity_id: light.cooker_light
+      type: is_on
+    - condition: device
+      device_id: 5e844eb166504e0395dae96655916dec
+      domain: light
+      entity_id: light.living_room_stand
+      type: is_on
+  action:
+  - service: script.1580666130293
+  - device_id: 5e844eb166504e0395dae96655916dec
+    domain: light
+    entity_id: light.living_room_stand
+    type: turn_off
+- id: '1580799345030'
+  alias: Turn off kitchen Sonos AM
+  description: ''
+  trigger:
+  - at: 06:50:00
+    platform: time
+  condition:
+  - condition: state
+    entity_id: media_player.kitchen_sonos
+    state: playing
+  action:
+  - data: {}
+    entity_id: media_player.kitchen_sonos
+    service: media_player.media_pause
+- id: '1581362458095'
+  alias: Turn on lights when Adrian is home
+  description: ''
+  trigger:
+  - device_id: 4edb227d4b0a43dda0cb93fe877d4eeb
+    domain: binary_sensor
+    entity_id: binary_sensor.openclose_2
+    platform: device
+    type: opened
+  condition:
+  - condition: and
+    conditions:
+    - condition: state
+      entity_id: person.adrian_chapman
+      state: home
+    - condition: device
+      device_id: 7fed303bfddf4578b1cc7b2135bfa81b
+      domain: light
+      entity_id: light.cooker_light
+      type: is_off
+    - below: '2'
+      condition: numeric_state
+      entity_id: sun.sun
+      value_template: '{{state.attributes.elevation}}'
+  action:
+  - service: script.1580666071205
+  - device_id: 5e844eb166504e0395dae96655916dec
+    domain: light
+    entity_id: light.living_room_stand
+    type: turn_on
+- id: '1581610414501'
+  alias: Certificate expiry x1ade Exchange
+  description: ''
+  trigger:
+  - entity_id: sensor.x1ade_exchange
+    platform: state
+    to: '10'
+  condition: []
+  action:
+  - data:
+      message: The certificate {{state_attr('sensor.x1ade_exchange', 'friendly_name')}}
+        expires in {{states('sensor.x1ade_exchange')}} days
+      title: Exchange certificate expiry
+    service: notify.email_alert
+- id: '1581611181917'
+  alias: Certificate expiry hassio
+  description: ''
+  trigger:
+  - entity_id: sensor.hassio
+    platform: state
+    to: '10'
+  condition: []
+  action:
+  - data:
+      message: The certificate {{state_attr('sensor.hassio', 'friendly_name')}} expires
+        in {{states('sensor.hassio')}} days
+      title: Hassio certificate expiry
+    service: notify.email_alert
+- alias: Time based light brightness adjustment
+  trigger:
+  - platform: event
+    event_type: state_changed
+  condition:
+  - condition: state
+    entity_id: group.household
+    state: home
+  - condition: template
+    value_template: '{{ trigger.event.data is not none }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.entity_id is not none }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.entity_id.split(''.'')[0] == ''light''
+      }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.entity_id.split(''_'')[0] != ''light.livingroom''
+      }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.entity_id.split(''_'')[0] != ''light.breakfast_bar_light''
+      }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.entity_id.split(''_'')[0] != ''light.cooker_light''
+      }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.entity_id.split(''_'')[0] != ''light.fuses_light''
+      }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.entity_id.split(''_'')[0] != ''light.knives_light''
+      }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.new_state.state == ''on'' }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.old_state.state == ''off'' }}'
+  action:
+  - service: light.turn_on
+    data_template:
+      entity_id: '{{ trigger.event.data.entity_id }}'
+      brightness_pct: "{% set hour=states(\"sensor.time\").split(':')[0] | int %}\
+        \ {%- if hour >= 0 and hour < 6  -%}\n  5\n{%- elif hour >= 8 and hour <22\
+        \  -%}\n  100\n{%- elif hour >= 22 and hour <24  -%}\n  15  \n{%- else -%}\n\
+        \  10\n{%- endif %}\n"
+  id: 86365df6c81442f5a266d87e91be0491
+- id: '1581886653226'
+  alias: Turn off lights PM
+  description: ''
+  trigger:
+  - entity_id: media_player.living_room_tv
+    for: 00:05:00
+    from: standby
+    platform: state
+    to: 'off'
+  condition:
+  - condition: or
+    conditions:
+    - condition: device
+      device_id: 5e844eb166504e0395dae96655916dec
+      domain: light
+      entity_id: light.living_room_stand
+      type: is_on
+    - condition: device
+      device_id: 7fed303bfddf4578b1cc7b2135bfa81b
+      domain: light
+      entity_id: light.cooker_light
+      type: is_on
+  - below: '0'
+    condition: numeric_state
+    entity_id: sun.sun
+    value_template: '{{state.attributes.elevation}}'
+  action:
+  - service: script.1580666130293
+  - device_id: 5e844eb166504e0395dae96655916dec
+    domain: light
+    entity_id: light.living_room_stand
+    type: turn_off
+- id: '1582144999866'
+  alias: Turn on Living Room stand light PM
+  description: ''
+  trigger:
+  - below: '2'
+    entity_id: sun.sun
+    platform: numeric_state
+    value_template: '{{state.attributes.elevation}}'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: media_player.living_room_tv
+      state: standby
+    - condition: state
+      entity_id: media_player.living_room_tv
+      state: playing
+    - condition: state
+      entity_id: media_player.living_room_tv
+      state: paused
+  action:
+  - entity_id: light.living_room_stand
+    service: light.turn_on
+- id: '1582145864638'
+  alias: Turn off Living room stand light PM
+  description: ''
+  trigger:
+  - entity_id: media_player.living_room_tv
+    for: 00:02:00
+    platform: state
+    to: 'off'
+  condition:
+  - before: 00:00:00
+    condition: time
+  action:
+  - entity_id: light.living_room_stand
+    service: light.turn_off
+- id: '1583001303502'
+  alias: Turn on utility light when door is opened
+  description: ''
+  trigger:
+  - device_id: 569892442beb4645986e3f57d3273ad0
+    domain: binary_sensor
+    entity_id: binary_sensor.utility_door
+    platform: device
+    type: opened
+  condition:
+  - condition: device
+    device_id: d0aa0e4677224831a33f6cbb8f7ccb67
+    domain: light
+    entity_id: light.utility
+    type: is_off
+  - below: '5'
+    condition: numeric_state
+    entity_id: sun.sun
+    value_template: '{{state.attributes.elevation}}'
+  action:
+  - device_id: d0aa0e4677224831a33f6cbb8f7ccb67
+    domain: light
+    entity_id: light.utility
+    type: turn_on
+- id: '1583001449358'
+  alias: Turn off utility light when door is shut
+  description: ''
+  trigger:
+  - device_id: 569892442beb4645986e3f57d3273ad0
+    domain: binary_sensor
+    entity_id: binary_sensor.utility_door
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    platform: device
+    type: not_opened
+  condition:
+  - condition: device
+    device_id: d0aa0e4677224831a33f6cbb8f7ccb67
+    domain: light
+    entity_id: light.utility
+    for:
+      hours: 0
+      minutes: 3
+      seconds: 0
+    type: is_on
+  - below: '5'
+    condition: numeric_state
+    entity_id: sun.sun
+    value_template: '{{state.attributes.elevation}}'
+  action:
+  - device_id: d0aa0e4677224831a33f6cbb8f7ccb67
+    domain: light
+    entity_id: light.utility
+    type: turn_off
+- id: '1583001731782'
+  alias: Turn off utility lights if door left open
+  description: ''
+  trigger:
+  - device_id: 569892442beb4645986e3f57d3273ad0
+    domain: binary_sensor
+    entity_id: binary_sensor.utility_door
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    platform: device
+    type: opened
+  condition:
+  - condition: device
+    device_id: d0aa0e4677224831a33f6cbb8f7ccb67
+    domain: light
+    entity_id: light.utility
+    for:
+      hours: 0
+      minutes: 3
+      seconds: 0
+    type: is_on
+  action:
+  - device_id: d0aa0e4677224831a33f6cbb8f7ccb67
+    domain: light
+    entity_id: light.utility
+    type: turn_off
+- id: '1583264631324'
+  alias: Wallmote 1 Living Room toggle stand light
+  description: ''
+  trigger:
+  - event_data:
+      data:
+        entity_id: zwave.aeon_labs_zw130_wallmote_quad_2
+        scene_data: 0
+        scene_id: 1
+    event_type: zwave.scene_activated
+    platform: event
+  condition: []
+  action:
+  - device_id: 5e844eb166504e0395dae96655916dec
+    domain: light
+    entity_id: light.living_room_stand
+    type: toggle
+- id: '1583272386880'
+  alias: Wallmote 4 toggle kitchen lights
+  description: ''
+  trigger:
+  - event_data:
+      data:
+        entity_id: zwave.aeon_labs_zw130_wallmote_quad
+        scene_data: 0
+        scene_id: 4
+    event_type: zwave.scene_activated
+    platform: event
+  condition: []
+  action:
+  - device_id: 689f521e63424b0fb6c71abe8e8d284a
+    domain: light
+    entity_id: light.kitchen
+    type: toggle

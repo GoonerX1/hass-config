@@ -1,0 +1,61 @@
+'1580663632136':
+  alias: Blink Trigger Camera Update
+  sequence:
+  - data:
+      name: Back Gate
+    service: blink.trigger_camera
+  - delay: 00:00:10
+  - data:
+      name: Front Door
+    service: blink.trigger_camera
+  - delay: 00:00:10
+  - service: blink.blink_update
+'1580666071205':
+  alias: Turn on Kitchen Lights
+  sequence:
+  - device_id: 4dce0a2189924351909fd2ffd0da7a46
+    domain: light
+    entity_id: light.breakfast_bar_light
+    type: turn_on
+  - device_id: 7fed303bfddf4578b1cc7b2135bfa81b
+    domain: light
+    entity_id: light.cooker_light
+    type: turn_on
+  - device_id: 7bdfcf5592cb4e40a6cfb04e324782ff
+    domain: light
+    entity_id: light.fuses_light
+    type: turn_on
+  - device_id: 3de3a232789f40fc9a6896f9cb82be35
+    domain: light
+    entity_id: light.knives_light
+    type: turn_on
+'1580666130293':
+  alias: Turn off Kitchen Lights
+  sequence:
+  - device_id: 7fed303bfddf4578b1cc7b2135bfa81b
+    domain: light
+    entity_id: light.cooker_light
+    type: turn_off
+  - device_id: 7bdfcf5592cb4e40a6cfb04e324782ff
+    domain: light
+    entity_id: light.fuses_light
+    type: turn_off
+  - device_id: 3de3a232789f40fc9a6896f9cb82be35
+    domain: light
+    entity_id: light.knives_light
+    type: turn_off
+  - device_id: 4dce0a2189924351909fd2ffd0da7a46
+    domain: light
+    entity_id: light.breakfast_bar_light
+    type: turn_off
+'1581635745828':
+  alias: Kitchen Radio Kerrang
+  sequence:
+  - data:
+      source: Kerrang! Radio
+    entity_id: media_player.kitchen_sonos
+    service: media_player.select_source
+  - data:
+      volume: 0.12
+    entity_id: media_player.kitchen_sonos
+    service: media_player.volume_set

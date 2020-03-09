@@ -1,0 +1,6 @@
+person.adrian_chapman:
+  icon: /local/AdrianChapman.png
+binary_sensor.192_168_34_18:
+  icon: mdi:cctv
+device_tracker.u7lr:
+  icon: mdi:wifi

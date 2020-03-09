@@ -1,0 +1,20 @@
+- id: '1580665515337'
+  name: Set Kitchen Sonos for AM radio
+  entities:
+    media_player.kitchen_sonos:
+      friendly_name: Kitchen Sonos
+      media_title: kerrang.aac?amsparams=playerid:BMUK_tunein;skey:1581633436&awparams=loggedin:false
+      shuffle: false
+      sonos_group:
+      - media_player.kitchen_sonos
+      source: Kerrang! Radio
+      state: playing
+      volume_level: 0.12
+- id: '1580799453247'
+  name: Turn off Kitchen Sonos
+  entities:
+    media_player.kitchen_sonos:
+      friendly_name: Kitchen Sonos
+      is_volume_muted: false
+      state: paused
+      volume_level: 0.12
