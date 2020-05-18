@@ -2,3 +2,4 @@
     name: Household Members
     entities:
       - person.adrian_chapman
+      - person.chris_allen

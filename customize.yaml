@@ -1,6 +1,14 @@
 person.adrian_chapman:
-  icon: /local/AdrianChapman.png
+  entity_picture: /local/AdrianChapman.png
 binary_sensor.192_168_34_18:
   icon: mdi:cctv
 device_tracker.u7lr:
   icon: mdi:wifi
+device_tracker.adrian_chapman_samsungs10ot:
+  entity_picture: /local/AdrianChapman.png
+device_tracker.adrian_chapman_s_sm_g973f:
+  entity_picture: /local/AdrianChapman.png
+device_tracker.gooner_s10_3:
+  entity_picture: /local/AdrianChapman.png
+device_tracker.gooner_s10_2:
+  entity_picture: /local/AdrianChapman.png
