@@ -90,7 +90,7 @@
     entity_id: light.1st_landing_light
     type: turn_off
 - id: '1580662385610'
-  alias: Arm Blink Cameras When Away
+  alias: Blink Arm Cameras When Away
   description: ''
   trigger:
   - entity_id: group.household
@@ -101,7 +101,7 @@
   - entity_id: alarm_control_panel.blink_home
     service: alarm_control_panel.alarm_arm_away
 - id: '1580662467114'
-  alias: Disarm Blink Cameras When Home
+  alias: Blink Disarm Cameras When Home
   description: ''
   trigger:
   - entity_id: group.household
@@ -340,9 +340,9 @@
   - condition: or
     conditions:
     - condition: device
-      device_id: 7fed303bfddf4578b1cc7b2135bfa81b
+      device_id: 4dce0a2189924351909fd2ffd0da7a46
       domain: light
-      entity_id: light.cooker_light
+      entity_id: light.breakfast_bar_light
       type: is_on
   - below: '0'
     condition: numeric_state
@@ -394,11 +394,18 @@
     platform: device
     type: opened
   condition:
-  - condition: device
-    device_id: db52aed599b84676ab12cba713c359e9
-    domain: light
-    entity_id: light.utility_1
-    type: is_off
+  - condition: and
+    conditions:
+    - condition: device
+      device_id: db52aed599b84676ab12cba713c359e9
+      domain: light
+      entity_id: light.utility_1
+      type: is_off
+    - condition: device
+      device_id: 9c2016b4d0e647bfb0aa2480596da1ad
+      domain: light
+      entity_id: light.utility_2
+      type: is_off
   - below: '2'
     condition: numeric_state
     entity_id: sun.sun
@@ -457,7 +464,7 @@
     platform: state
     to: 'on'
   condition:
-  - condition: and
+  - condition: or
     conditions:
     - condition: device
       device_id: db52aed599b84676ab12cba713c359e9
@@ -491,10 +498,9 @@
     platform: event
   condition: []
   action:
-  - device_id: 689f521e63424b0fb6c71abe8e8d284a
-    domain: light
-    entity_id: light.kitchen
-    type: toggle
+  - data: {}
+    entity_id: script.1590491431704
+    service: script.turn_on
 - id: '1584215239807'
   alias: Wallmote 3 turn TV off
   description: ''
@@ -639,7 +645,7 @@
   alias: Turn on living room lights when its dark
   description: ''
   trigger:
-  - below: '2.5'
+  - below: '2'
     entity_id: sun.sun
     platform: numeric_state
     value_template: '{{state.attributes.elevation}}'

@@ -5,53 +5,22 @@ default_config:
 # http:
 #   base_url: example.duckdns.org:8123
 homeassistant:
-  #packages: !include_dir_named packages
   customize: !include customize.yaml
-#  auth_providers:
-#    - type: trusted_networks
-#      trusted_networks:
-#        - 192.168.34.0/24
-#        - 192.168.200.0/24
-#      trusted_users:
-#        192.168.34.0/24:
-#          - 9ee6057145804b9f8ce94493ba68b901
-#          - 10840869ea1e42cd90afd900eb71641d
-#          - 85781d091538439dbcd916ad730c7b7c
-#        192.168.200.0/24:
-#          - 9ee6057145804b9f8ce94493ba68b901
-#        "2001:470:1f1d:245:fd4c:bc46:4c48:a94c":
-#          - 9ee6057145804b9f8ce94493ba68b901
-#          - 10840869ea1e42cd90afd900eb71641d
-#          - 85781d091538439dbcd916ad730c7b7c
-#        95.172.224.141:
-#          - 9ee6057145804b9f8ce94493ba68b901
-#          - 10840869ea1e42cd90afd900eb71641d
-#          - 85781d091538439dbcd916ad730c7b7c
-    
-#upnp:
-#  port_mapping: false
-#  sensors: true
-  
+
 discovery:
   enable: dlna_dmr
 
-#mqtt:
-#  discovery: true
-#  discovery_prefix: homeassistant
-#  broker: localhost
-  
 logger:
   default: warn
   logs:
 #   pydeconz: debug
 #   homeassistant.components.deconz: debug
-    homeassistant.components.automation: info
+    #homeassistant.components.automation: info
     #aiounifi: info
     #homeassistant.components.unifi: info
     #homeassistant.components.device_tracker.unifi: info
     #homeassistant.components.switch.unifi: info
-#zwave:
-#  usb_path: /dev/ttyACM0
+    homeassistant.components.media_player.spotify: info
 
 apcupsd:
   host: a722577e-apcupsd       
@@ -66,6 +35,10 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
+spotify:
+  client_id: !secret spotify_id
+  client_secret: !secret spotify_secret
+  
 panel_custom:
   - name: zwavegraph2
     sidebar_title: ZWave Graph2
@@ -76,15 +49,6 @@ blink:
   username: !secret blink_username
   password: !secret blink_password
   scan_interval: 300
-#  binary_sensors:
-#    monitored_conditions:
-#      - motion_enabled
-#      - motion_detected
-#  sensors:
-#    monitored_conditions:
-#      - battery
-#     - temperature
-#      - wifi_strength
 
 http:
  server_port: 8123  
@@ -101,12 +65,7 @@ camera:
     password: !secret syn_sur_password
     timeout: 15
     verify_ssl: false
-  #- platform: onvif
-   # name: "Garage CCTV"
-    #host: 192.168.34.117
-    #port: 80
-    #rtsp_transport: tcp
-    
+
 sensor:
  - platform: fitbit
    clock_format: 24H
@@ -187,7 +146,12 @@ media_player:
     host: livingroom.x1ade.local
   - platform: kodi
     host: bedroom.x1ade.local
-
+  - platform: denonavr
+    host: 192.168.34.125
+    name: OfficeAVR
+    show_all_sources: true
+    timeout: 5
+        
 device_tracker:
   - platform: bluetooth_tracker
     new_device_defaults:
@@ -200,6 +164,7 @@ ifttt:
 #somfy:
 #  client_id: !secret somfy_key
 #  client_secret: !secret somfy_secret
+
 # Example configuration.yaml entry with exclude
 #recorder:
 #  purge_keep_days: 5
