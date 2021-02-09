@@ -1,0 +1,30 @@
+# Z-Wave Graph specific colors to be added to theme
+  zwave-background-color: var(--primary-background-color)           # main window bacground color
+  zwave-group-background-color: var(--secondary-background-color)   # grouped devices background color
+  zwave-group-border-color: var(--light-background)                 # border of group rectangle
+  zwave-group-label-color: var(--primary-text-color)                # color of group label
+  zwave-zoom-highlight-color: var(--primary-color)                  # zoom area bacground color - not identified yet
+  zwave-zoom-border-color: var(--light-background)                  # zoom area border color - not identified yet
+  zwave-legend-header-color: var(--primary-text-color)              # text of legend header - not know yet how to implement
+  zwave-legend-item-color: var(--secondary-text-color)              # legend item text color (not for node colors)
+  zwave-node-hub-background-color: var(--light-background)          # zwave hub background color
+  zwave-node-hub-outline-color: var(--greenish)                     # zwave hub background color
+  zwave-node-hub-text-color: var(--greenish)                        # zwave hub text color
+  zwave-1-hop-background-color: var(--light-background)             # 1st level node background color
+  zwave-1-hop-outline-color: var(--cyanish)                         # 1st level node outline color
+  zwave-1-hop-text-color: var(--cyanish)                            # 1st level node text color
+  zwave-2-hop-background-color: var(--light-background)             # ..........
+  zwave-2-hop-outline-color: var(--light-magenta)
+  zwave-2-hop-text-color: var(--light-magenta)
+  zwave-3-hop-background-color: var(--light-background)
+  zwave-3-hop-outline-color: var(--dark-magenta)
+  zwave-3-hop-text-color: var(--dark-magenta)
+  zwave-4-hop-background-color: var(--light-background)
+  zwave-4-hop-outline-color: var(--dimmed-text)
+  zwave-4-hop-text-color: var(--dimmed-text)
+  zwave-failed-background-color: var(--light-background)
+  zwave-failed-outline-color: "#ff0000" #var(--)
+  zwave-failed-text-color: "#ff0000" #var(--)
+  zwave-unconnected-background-color: var(--primary-background-color)
+  zwave-unconnected-outline-color: var(--dimmed-text)
+  zwave-unconnected-text-color: var(--dimmed-text)

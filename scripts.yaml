@@ -2,52 +2,27 @@
   alias: Blink Trigger Camera Update
   sequence:
   - data:
-      name: Back Gate
+      entity_id: camera.blink_back_gate_2
     service: blink.trigger_camera
   - delay: 00:00:10
   - data:
-      name: Front Door
+      entity_id: camera.blink_front_door_2
     service: blink.trigger_camera
   - delay: 00:00:10
   - service: blink.blink_update
+  mode: single
 '1580666071205':
   alias: Turn on Kitchen Lights
   sequence:
-  - device_id: 4dce0a2189924351909fd2ffd0da7a46
-    domain: light
-    entity_id: light.breakfast_bar_light
-    type: turn_on
-  - device_id: 7fed303bfddf4578b1cc7b2135bfa81b
-    domain: light
-    entity_id: light.cooker_light
-    type: turn_on
-  - device_id: 7bdfcf5592cb4e40a6cfb04e324782ff
-    domain: light
-    entity_id: light.fuses_light
-    type: turn_on
-  - device_id: 3de3a232789f40fc9a6896f9cb82be35
-    domain: light
-    entity_id: light.knives_light
-    type: turn_on
+  - data: {}
+    entity_id: switch.kitchen_led_zha_group_0x0002
+    service: switch.turn_on
 '1580666130293':
   alias: Turn off Kitchen Lights
   sequence:
-  - device_id: 7fed303bfddf4578b1cc7b2135bfa81b
-    domain: light
-    entity_id: light.cooker_light
-    type: turn_off
-  - device_id: 7bdfcf5592cb4e40a6cfb04e324782ff
-    domain: light
-    entity_id: light.fuses_light
-    type: turn_off
-  - device_id: 3de3a232789f40fc9a6896f9cb82be35
-    domain: light
-    entity_id: light.knives_light
-    type: turn_off
-  - device_id: 4dce0a2189924351909fd2ffd0da7a46
-    domain: light
-    entity_id: light.breakfast_bar_light
-    type: turn_off
+  - data: {}
+    entity_id: switch.kitchen_led_zha_group_0x0002
+    service: switch.turn_off
 '1581635745828':
   alias: Kitchen Radio Kerrang
   sequence:
@@ -62,19 +37,115 @@
 '1590491431704':
   alias: Toggle Kitchen Lights
   sequence:
-  - device_id: 4dce0a2189924351909fd2ffd0da7a46
-    domain: light
-    entity_id: light.breakfast_bar_light
+  - device_id: 7e6278f5278b4cb592a626fadb78caa3
+    domain: switch
+    entity_id: switch.ewelink_sa_003_zigbee_716e621b_on_off
     type: toggle
-  - device_id: 7fed303bfddf4578b1cc7b2135bfa81b
-    domain: light
-    entity_id: light.cooker_light
+  - device_id: ea627a414cfd4cd894a753acc9f4d9d1
+    domain: switch
+    entity_id: switch.ewelink_sa_003_zigbee_7073431d_on_off
     type: toggle
-  - device_id: 7bdfcf5592cb4e40a6cfb04e324782ff
-    domain: light
-    entity_id: light.fuses_light
+  - device_id: 4319ad5bba314ac0a71718b6ac2ea1fc
+    domain: switch
+    entity_id: switch.ewelink_sa_003_zigbee_9e85431d_on_off
     type: toggle
-  - device_id: 3de3a232789f40fc9a6896f9cb82be35
-    domain: light
-    entity_id: light.knives_light
+  - device_id: 47beee55d2bb452895b08e402fe76915
+    domain: switch
+    entity_id: switch.ewelink_sa_003_zigbee_2b0b441d_on_off
     type: toggle
+  mode: single
+door_bell_for_chris:
+  alias: Door Bell for Chris
+  icon: mdi:doorbell
+  mode: single
+  sequence:
+  - service: media_player.turn_on
+    data: {}
+    entity_id: media_player.soundtouch_chris
+  - data:
+      media_content_id: http://192.168.34.104/files/doorsoff.mp3
+      media_content_type: MUSIC
+    entity_id: media_player.soundtouch_chris
+    service: media_player.play_media
+  - delay: 00:00:06
+  - data:
+      media_content_id: http://192.168.34.104/files/doorbell-7.mp3
+      media_content_type: MUSIC
+    entity_id: media_player.soundtouch_chris
+    service: media_player.play_media
+  - delay: 00:00:05
+  - service: media_player.turn_off
+    data: {}
+    entity_id: media_player.soundtouch_chris
+  max: 10
+adrian_is_home:
+  alias: Adrian is home
+  icon: mdi:star
+  mode: single
+  sequence:
+  - data: {}
+    entity_id: media_player.dinning
+    service: media_player.turn_on
+  - data: {}
+    entity_id: media_player.dinning
+    service: media_player.volume_up
+  - data: {}
+    entity_id: media_player.dinning
+    service: media_player.volume_up
+  - data:
+      media_content_id: http://192.168.34.104/files/heresjohnny.mp3
+      media_content_type: MUSIC
+    entity_id: media_player.dinning
+    service: media_player.play_media
+  - delay: 00:00:05
+  - data: {}
+    entity_id: media_player.dinning
+    service: media_player.volume_down
+  - data: {}
+    entity_id: media_player.dinning
+    service: media_player.volume_down
+  - data: {}
+    entity_id: media_player.dinning
+    service: media_player.turn_off
+im_leaving:
+  alias: I'm leaving
+  sequence:
+  - service: media_player.turn_off
+    data: {}
+    entity_id: media_player.bedroom_sonos
+  - service: media_player.turn_off
+    data: {}
+    entity_id: media_player.kitchen_sonos
+  - service: media_player.turn_off
+    data: {}
+    entity_id: media_player.sonos_one
+  - service: script.turn_on
+    data: {}
+    entity_id: script.1580666130293
+  mode: single
+  icon: mdi:exit-to-app
+camera_garage_notification:
+  alias: Camera Garage Notification
+  sequence:
+  - service: camera.snapshot
+    data:
+      filename: www/snapshot/snapshot_{{ entity_id.name }}.jpg
+    entity_id: camera.diskstation_garage
+  - delay: '2'
+  - service: notify.livingroom
+    data:
+      title: DriveWay
+      message: Motion Detected on Driveway
+      data_template:
+        photo:
+        - file: www/snapshot/snapshot_{{ entity_id.name }}.jpg
+          capture: Snapshot
+  - service: notify.email_alert
+    data:
+      title: DriveWay
+      message: Motion Detected on Driveway
+      data_template:
+        images:
+        - www/snapshot/snapshot_{{ entity_id.name }}.jpg
+  mode: single
+  icon: mdi:cctv

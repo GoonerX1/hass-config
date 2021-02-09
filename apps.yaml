@@ -1,0 +1,5 @@
+night_mode:
+  module: nightmode
+  class: NightMode
+  light: light.sengled_e11_g33_fa895503_level_on_off,light.sengled_e11_g33_ef8a5503_level_on_off,light.sengled_e11_g33_70245803_level_on_off,light.sengled_e11_g33_1e9c5103_level_on_off,light.sengled_e14_u43_7f773b03_level_on_off,light.sengled_e14_u43_067b3b03_level_on_off
+  night_brightness: 20

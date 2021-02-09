@@ -1,30 +1,43 @@
-# Configure a default setup of Home Assistant (frontend, api, etc)
 default_config:
+cloud:
+#frontend:
 
-# Uncomment this if you are using SSL/TLS, running in Docker container, etc.
-# http:
-#   base_url: example.duckdns.org:8123
+http:
+ server_port: 8123  
+ ssl_certificate: /ssl/fullchain.pem
+ ssl_key: /ssl/privkey.pem
+ #base_url: https://hassio.x1ade.co.uk:8123
+ ip_ban_enabled: true
+ login_attempts_threshold: 5
+
 homeassistant:
   customize: !include customize.yaml
 
-discovery:
-  enable: dlna_dmr
+#discovery:
+  #enable: dlna_dmr
 
 logger:
-  default: warn
+  default: error
   logs:
+    homeassistant.components.mqtt: warning
+    #homeassistant.components.zha.light: debug
+#   homeassistant.components.rfxtrx: debug
 #   pydeconz: debug
 #   homeassistant.components.deconz: debug
-    #homeassistant.components.automation: info
+    #homeassistant.components.automation: debug
     #aiounifi: info
     #homeassistant.components.unifi: info
     #homeassistant.components.device_tracker.unifi: info
     #homeassistant.components.switch.unifi: info
-    homeassistant.components.media_player.spotify: info
+    #homeassistant.components.media_player.spotify: info
+    #custom_components.hacs: debug
+    #hacs: debug
+    #queueman: debug
+    #AIOGitHubAPI: debug
+    #homeassistant.components.smartthings: debug
 
-apcupsd:
-  host: a722577e-apcupsd       
-# Text to speech
+zha_map:
+
 tts:
   - platform: google_translate
     service_name: google_translate_say
@@ -35,57 +48,101 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
+binary_sensor:
+  - platform: workday
+    country: UK
+    workdays: [mon, tue, wed, thu, fri]
+    excludes: [sat, sun, holiday]
+    add_holidays:
+      - '2020-12-24'
+      - '2020-12-27'
+      - '2020-12-28'
+      - '2020-12-29'
+      - '2020-12-30'
+      - '2020-12-31'
+
+device_tracker:
+  - platform: bluetooth_tracker
+    track_new_devices: true
+  - platform: mqtt
+    devices:
+      AdrianPhone_bt: 'hassrpi/device_tracker/gooner_s10_bt/state'
+      ChrisPhone1_bt: 'hassrpi/device_tracker/chris_laptops_iphone_bt/state'
+      ChrisPhone2_bt: 'hassrpi/device_tracker/chris_laptops_iphone_2_bt/state'
+    track_new_devices: true
+       
+input_boolean:
+  night_mode:
+    name: "Night Mode"
+    icon: mdi:weather-night
+  light_replay_enabled:
+    name: "Enable light replay"
+    icon: mdi:lightbulb-group-outline
+
+apcupsd:
+  host: a722577e-apcupsd
+
+rfxtrx:
+  device: /dev/serial/by-id/usb-RFXCOM_RFXtrx433XL_DO4GU7KW-if00-port0
+  automatic_add: false
+#  signal_repetitions: 1
+  devices:
+  # 1st_Landing_Blind
+    071a000001010101:
+  # Office
+    071a000001010301:
+  # Living_Room
+    071a000001010202:
+    
+panel_custom:
+  - name: zwave-graph-panel
+    sidebar_title: ZWave Graph
+    sidebar_icon: mdi:z-wave
+    url_path: zwave-graph
+    module_url: /local/zwavegraph3.js
+    config:
+      # ranker - pick one: network-simplex, tight-tree, longest-path
+      ranker: network-simplex
+      # edge_visibility - pick one: relevant, all
+      edge_visibility: relevant
+      # grouping - pick one: z-wave, ungrouped
+      grouping: z-wave
+  - name: custom-panel-zigzag
+    sidebar_title: Zigzag
+    sidebar_icon: mdi:zigbee
+    url_path: zigzag
+    module_url: /local/zigzag/zigzag-panel.js
+    trust_external_script: true
+    config:
+      who: world
+
+panel_iframe:
+  mdiindex:
+    title: MDI Icon Index
+    icon: mdi:vector-square
+    url: https://cdn.rawgit.com/james-fry/home-assistant-mdi/efd95d7a/home-assistant-mdi.html
+    
 spotify:
   client_id: !secret spotify_id
   client_secret: !secret spotify_secret
-  
-panel_custom:
-  - name: zwavegraph2
-    sidebar_title: ZWave Graph2
-    sidebar_icon: mdi:access-point-network
-    url_path: zwave
-    
-blink:
-  username: !secret blink_username
-  password: !secret blink_password
-  scan_interval: 300
 
-http:
- server_port: 8123  
- ssl_certificate: /ssl/fullchain.pem
- ssl_key: /ssl/privkey.pem
- base_url: https://hassio.x1ade.co.uk:8123
- ip_ban_enabled: true
- login_attempts_threshold: 5
-
-camera:
-  - platform: synology
-    url: https://ds.x1ade.co.uk:5001
-    username: !secret synology_hassio
-    password: !secret syn_sur_password
-    timeout: 15
-    verify_ssl: false
+#camera:
+ # - platform: synology
+  #  url: https://ds.x1ade.co.uk:5001
+   # username: !secret synology_hassio
+    #password: !secret syn_sur_password
+    #timeout: 15
+    #verify_ssl: false
 
 sensor:
  - platform: fitbit
    clock_format: 24H
    unit_system: en_GB
    monitored_resources:
-     - "activities/heart"
-     - "activities/tracker/activityCalories"
-     - "activities/tracker/calories"
-     - "activities/tracker/distance"
-     - "activities/tracker/elevation"
-     - "activities/tracker/floors"
-     - "activities/tracker/steps"
      - "body/bmi"
      - "body/fat"
      - "body/weight"
      - "devices/battery"
-     - "sleep/efficiency"
-     - "sleep/minutesAsleep"
-     - "sleep/startTime"
-     - "sleep/timeInBed"
  - platform: time_date
    display_options:
       - 'time'
@@ -99,7 +156,12 @@ sensor:
      - bcharge
      - timeleft
      - outputv
-
+ - platform: lastfm
+   api_key: !secret lastfm_api
+   users:
+     - x1ade
+ - platform: season
+  
 notify:
   - name: email_alert
     platform: smtp
@@ -120,18 +182,24 @@ notify:
     host: 192.168.34.112
   - platform: msteams
     url: https://outlook.office.com/webhook/24ff624b-6a1f-4526-9e89-087457d7f2b5@fc36efd4-da9d-4f68-a0d4-7fb5ae5308d1/IncomingWebhook/e150a1206e1a42ab88001442e7759055/65835691-8235-4fa7-96fe-88efff70d7da
+  - platform: nfandroidtv
+    name: ChrisTV
+    host: 192.168.34.108
+    
 media_player:
   - platform: androidtv
     scan_interval: 60
-    name: Living Room TV
+    name: Bedroom Fire TV
     device_class: androidtv
-    adbkey: "/config/adb/adbkey"
-    host: 192.168.34.112
+    #adbkey: "/config/adb/adbkey"
+    host: 192.168.34.136
     adb_server_ip: 127.0.0.1
     adb_server_port: 5037
     state_detection_rules:
       'com.netflix.ninja':
         - 'media_session_state'
+      'com.spotify.tv.android':
+        - 'standby'
       'com.plexapp.android':
         - 'playing':
             'media_session_state': 3  # this indentation is important!
@@ -140,46 +208,55 @@ media_player:
             'media_session_state': 3  # this indentation is important!
             'wake_lock_size': 1       # this indentation is important!
         - 'standby'
+      'com.dvblogic.tvmosaic':
+        - 'standby'
+      'com.amazon.tv.launcher':
+        - 'standby'
+      'com.amazon.avod':
+        - 'playing':
+            'wake_lock_size': 4  # this indentation is important!
+        - 'playing':
+            'wake_lock_size': 3  # this indentation is important!
+        - 'paused':
+            'wake_lock_size': 2  # this indentation is important!
+        - 'paused':
+            'wake_lock_size': 1  # this indentation is important!
+        - 'standby'
   - platform: kodi
     host: kitchen.x1ade.local
   - platform: kodi
     host: livingroom.x1ade.local
   - platform: kodi
     host: bedroom.x1ade.local
-  - platform: denonavr
-    host: 192.168.34.125
-    name: OfficeAVR
-    show_all_sources: true
-    timeout: 5
-        
-device_tracker:
-  - platform: bluetooth_tracker
-    new_device_defaults:
-      track_new_devices: true
+ # - platform: denonavr
+ #   host: 192.168.34.125
+ #   name: OfficeAVR
+ #   show_all_sources: true
+ #   timeout: 5
+  - platform: soundtouch
+    host: 192.168.34.110
+    port: 8090
+    name: Soundtouch Chris
 
-owntracks:
-  max_gps_accuracy: 200
 ifttt:
   key: !secret ifttt_api_key
 #somfy:
 #  client_id: !secret somfy_key
 #  client_secret: !secret somfy_secret
-
 # Example configuration.yaml entry with exclude
-#recorder:
-#  purge_keep_days: 5
-#  db_url: mssql+pyodbc://hassio:Longer69@192.168.34.14/AdrianDB?charset=utf8;DRIVER={FreeTDS};Port=1433;
-#  exclude:
-#    domains:
-#      - automation
-#      - weblink
-#      - updater
-#      - light
-#    entities:
-#      - sun.sun # Don't record sun data
-#      - sensor.last_boot # Comes from 'systemmonitor' sensor platform
-#      - sensor.date
-#      - sensor.date_time
-#      - sensor.time
-#    event_types:
-#      - call_service # Don't record service calls
+
+recorder:
+  purge_keep_days: 100
+  db_url: !secret recorder_db_url
+  exclude:
+    domains:
+      - weblink
+      - updater
+    entities:
+      - sensor.date
+      - sensor.date_time
+      - sensor.time
+    #event_types:
+        #  - call_service # Don't record service calls
+upnp:
+  local_ip: 192.168.34.121
