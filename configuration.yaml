@@ -1,11 +1,12 @@
 default_config:
 cloud:
-#frontend:
-
+frontend:
+  themes: !include_dir_merge_named themes
+  
 http:
  server_port: 8123  
- ssl_certificate: /ssl/fullchain.pem
- ssl_key: /ssl/privkey.pem
+ #ssl_certificate: /ssl/fullchain.pem
+ #ssl_key: /ssl/privkey.pem
  #base_url: https://hassio.x1ade.co.uk:8123
  ip_ban_enabled: true
  login_attempts_threshold: 5
@@ -19,7 +20,7 @@ homeassistant:
 logger:
   default: error
   logs:
-    homeassistant.components.mqtt: warning
+    homeassistant.components.mqtt: info
     #homeassistant.components.zha.light: debug
 #   homeassistant.components.rfxtrx: debug
 #   pydeconz: debug
@@ -36,8 +37,15 @@ logger:
     #AIOGitHubAPI: debug
     #homeassistant.components.smartthings: debug
 
-zha_map:
-
+#zha_map:
+stream:
+#camera:
+#  - platform: generic
+#    name: G4 Doorbell
+#    stream_source: rtsps://192.168.34.1:7441/MlEEjklAdKLN7Wvl?enableSrtp
+#    still_image_url: https://hassio.x1ade.co.uk:8123/local/2RMDoorbellG4.jpg
+#    verify_ssl: false
+    
 tts:
   - platform: google_translate
     service_name: google_translate_say
@@ -50,27 +58,35 @@ scene: !include scenes.yaml
 
 binary_sensor:
   - platform: workday
-    country: UK
+    country: GB
+    province: England
     workdays: [mon, tue, wed, thu, fri]
     excludes: [sat, sun, holiday]
     add_holidays:
-      - '2020-12-24'
-      - '2020-12-27'
-      - '2020-12-28'
-      - '2020-12-29'
-      - '2020-12-30'
-      - '2020-12-31'
+      - '2022-09-12'
+      - '2022-09-13'
+      - '2022-09-14'
+      - '2022-09-15'
+      - '2022-09-16'
+      - '2022-12-19'
+      - '2022-12-20'
+      - '2022-12-21'
+      - '2022-12-22'
+      - '2022-12-23'
+      - '2022-12-26'
+      - '2022-12-27'
+      - '2022-12-28'
+      
+  - platform: template
+    sensors:
+      camera_garage_motion_detect:
+        value_template: "{{ is_state ( 'camera.diskstation_reolink_rlc_820a', 'recording' ) }}"
 
 device_tracker:
-  - platform: bluetooth_tracker
-    track_new_devices: true
-  - platform: mqtt
-    devices:
-      AdrianPhone_bt: 'hassrpi/device_tracker/gooner_s10_bt/state'
-      ChrisPhone1_bt: 'hassrpi/device_tracker/chris_laptops_iphone_bt/state'
-      ChrisPhone2_bt: 'hassrpi/device_tracker/chris_laptops_iphone_2_bt/state'
-    track_new_devices: true
-       
+  #- platform: bluetooth_tracker
+  #  track_new_devices: true
+  #- platform: bluetooth_le_tracker
+   # track_battery: true
 input_boolean:
   night_mode:
     name: "Night Mode"
@@ -78,9 +94,6 @@ input_boolean:
   light_replay_enabled:
     name: "Enable light replay"
     icon: mdi:lightbulb-group-outline
-
-apcupsd:
-  host: a722577e-apcupsd
 
 rfxtrx:
   device: /dev/serial/by-id/usb-RFXCOM_RFXtrx433XL_DO4GU7KW-if00-port0
@@ -93,28 +106,27 @@ rfxtrx:
     071a000001010301:
   # Living_Room
     071a000001010202:
+  # Dinning Venetian
+    071a000001020301:
     
 panel_custom:
-  - name: zwave-graph-panel
-    sidebar_title: ZWave Graph
-    sidebar_icon: mdi:z-wave
-    url_path: zwave-graph
-    module_url: /local/zwavegraph3.js
-    config:
-      # ranker - pick one: network-simplex, tight-tree, longest-path
-      ranker: network-simplex
-      # edge_visibility - pick one: relevant, all
-      edge_visibility: relevant
-      # grouping - pick one: z-wave, ungrouped
-      grouping: z-wave
   - name: custom-panel-zigzag
     sidebar_title: Zigzag
     sidebar_icon: mdi:zigbee
     url_path: zigzag
-    module_url: /local/zigzag/zigzag-panel.js
+    module_url: /local/zigzag/zigzag-panel.esm.js
     trust_external_script: true
     config:
       who: world
+      zigzag:
+        plugin-path: "/local/zigzag/plugins"
+        plugin-data:
+          type: "file"
+          filepath: "/local/zigzag/devices.json"
+        plugin-layout:
+          type: "d3"
+        plugin-render:
+          type: "three"
 
 panel_iframe:
   mdiindex:
@@ -122,9 +134,9 @@ panel_iframe:
     icon: mdi:vector-square
     url: https://cdn.rawgit.com/james-fry/home-assistant-mdi/efd95d7a/home-assistant-mdi.html
     
-spotify:
-  client_id: !secret spotify_id
-  client_secret: !secret spotify_secret
+#spotify:
+#  client_id: !secret spotify_id
+#  client_secret: !secret spotify_secret
 
 #camera:
  # - platform: synology
@@ -135,33 +147,35 @@ spotify:
     #verify_ssl: false
 
 sensor:
- - platform: fitbit
-   clock_format: 24H
-   unit_system: en_GB
-   monitored_resources:
-     - "body/bmi"
-     - "body/fat"
-     - "body/weight"
-     - "devices/battery"
  - platform: time_date
    display_options:
       - 'time'
       - 'date'
       - 'date_time'
- - platform: apcupsd
-   resources:
-     - status
-     - linev
-     - loadpct
-     - bcharge
-     - timeleft
-     - outputv
  - platform: lastfm
    api_key: !secret lastfm_api
    users:
      - x1ade
- - platform: season
-  
+ - platform: plex_recently_added
+   token: !secret plex_token
+   host: 192.168.34.32
+   port: 32400
+ - platform: sonarr_upcoming_media
+   api_key: !secret sonarr_api
+   host: 192.168.34.11
+   port: 8989
+   days: 7
+   ssl: false
+   max: 10 
+ - platform: radarr_upcoming_media
+   api_key: !secret radarr_api
+   host: 127.0.0.1
+   port: 7878
+   days: 14
+   ssl: false
+   theaters: false
+   max: 10
+    
 notify:
   - name: email_alert
     platform: smtp
@@ -170,83 +184,77 @@ notify:
     encryption: starttls
     timeout: 15
     sender: hassio@x1ade.co.uk
-    recipient: ade@x1ade.co.uk
+    recipient: adrian@x1ade.co.uk
     sender_name: HassIO
   - platform: html5
     name: Hass.IO X1ADE
     vapid_pub_key: !secret vapid_pub_key
     vapid_prv_key: !secret vapid_prv_key
     vapid_email: ade@x1ade.co.uk
-  - platform: nfandroidtv
-    name: LivingRoom
-    host: 192.168.34.112
+#  - platform: nfandroidtv
+#    name: LivingRoom
+#    host: 192.168.34.14
   - platform: msteams
     url: https://outlook.office.com/webhook/24ff624b-6a1f-4526-9e89-087457d7f2b5@fc36efd4-da9d-4f68-a0d4-7fb5ae5308d1/IncomingWebhook/e150a1206e1a42ab88001442e7759055/65835691-8235-4fa7-96fe-88efff70d7da
-  - platform: nfandroidtv
-    name: ChrisTV
-    host: 192.168.34.108
+#  - platform: nfandroidtv
+#    name: ChrisTV
+#    host: 192.168.34.141
     
-media_player:
-  - platform: androidtv
-    scan_interval: 60
-    name: Bedroom Fire TV
-    device_class: androidtv
-    #adbkey: "/config/adb/adbkey"
-    host: 192.168.34.136
-    adb_server_ip: 127.0.0.1
-    adb_server_port: 5037
-    state_detection_rules:
-      'com.netflix.ninja':
-        - 'media_session_state'
-      'com.spotify.tv.android':
-        - 'standby'
-      'com.plexapp.android':
-        - 'playing':
-            'media_session_state': 3  # this indentation is important!
-            'wake_lock_size': 3       # this indentation is important!
-        - 'paused':
-            'media_session_state': 3  # this indentation is important!
-            'wake_lock_size': 1       # this indentation is important!
-        - 'standby'
-      'com.dvblogic.tvmosaic':
-        - 'standby'
-      'com.amazon.tv.launcher':
-        - 'standby'
-      'com.amazon.avod':
-        - 'playing':
-            'wake_lock_size': 4  # this indentation is important!
-        - 'playing':
-            'wake_lock_size': 3  # this indentation is important!
-        - 'paused':
-            'wake_lock_size': 2  # this indentation is important!
-        - 'paused':
-            'wake_lock_size': 1  # this indentation is important!
-        - 'standby'
-  - platform: kodi
-    host: kitchen.x1ade.local
-  - platform: kodi
-    host: livingroom.x1ade.local
-  - platform: kodi
-    host: bedroom.x1ade.local
+#media_player:
+#  - platform: androidtv
+#    scan_interval: 60
+#    name: Bedroom Fire TV
+#    device_class: androidtv
+#    #adbkey: "/config/adb/adbkey"
+#    host: 192.168.34.138
+#    adb_server_ip: 127.0.0.1
+#    adb_server_port: 5037
+#    state_detection_rules:
+#      'com.netflix.ninja':
+#        - 'media_session_state'
+#      'com.spotify.tv.android':
+#        - 'standby'
+#      'com.plexapp.android':
+#        - 'playing':
+#            'media_session_state': 3  # this indentation is important!
+#            'wake_lock_size': 3       # this indentation is important!
+#        - 'paused':
+#            'media_session_state': 3  # this indentation is important!
+#            'wake_lock_size': 1       # this indentation is important!
+#        - 'standby'
+#      'com.dvblogic.tvmosaic':
+#        - 'standby'
+#      'com.amazon.tv.launcher':
+#        - 'standby'
+#      'com.amazon.avod':
+#        - 'playing':
+#            'wake_lock_size': 4  # this indentation is important!
+#        - 'playing':
+#            'wake_lock_size': 3  # this indentation is important!
+#        - 'paused':
+#            'wake_lock_size': 2  # this indentation is important!
+#        - 'paused':
+#            'wake_lock_size': 1  # this indentation is important!
+#        - 'standby'
  # - platform: denonavr
  #   host: 192.168.34.125
  #   name: OfficeAVR
  #   show_all_sources: true
  #   timeout: 5
-  - platform: soundtouch
-    host: 192.168.34.110
-    port: 8090
-    name: Soundtouch Chris
+#  - platform: soundtouch
+#    host: 192.168.34.110
+#    port: 8090
+#    name: Soundtouch Chris
 
-ifttt:
-  key: !secret ifttt_api_key
+#ifttt:
+#  key: !secret ifttt_api_key
 #somfy:
 #  client_id: !secret somfy_key
 #  client_secret: !secret somfy_secret
 # Example configuration.yaml entry with exclude
 
 recorder:
-  purge_keep_days: 100
+  purge_keep_days: 21
   db_url: !secret recorder_db_url
   exclude:
     domains:
@@ -258,5 +266,17 @@ recorder:
       - sensor.time
     #event_types:
         #  - call_service # Don't record service calls
-upnp:
-  local_ip: 192.168.34.121
+
+input_number:
+  current_volume_sonos_one:
+    name: 'Current volume Living Room'
+    min: 0
+    max: 1
+  current_volume_kitchen_sonos:
+    name: 'Current colume kitchen sonos'
+    min: 0
+    max: 1
+  current_volume_bedroom_sonos:
+    name: 'Current volume bedroom sonos'
+    min: 0
+    max: 1

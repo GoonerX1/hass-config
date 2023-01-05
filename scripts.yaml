@@ -1,13 +1,17 @@
 '1580663632136':
   alias: Blink Trigger Camera Update
   sequence:
-  - data:
-      entity_id: camera.blink_back_gate_2
+  - data: {}
     service: blink.trigger_camera
+    target:
+      entity_id:
+      - camera.blink_back_gate
   - delay: 00:00:10
-  - data:
-      entity_id: camera.blink_front_door_2
+  - data: {}
     service: blink.trigger_camera
+    target:
+      entity_id:
+      - camera.blink_front_door
   - delay: 00:00:10
   - service: blink.blink_update
   mode: single
@@ -15,32 +19,67 @@
   alias: Turn on Kitchen Lights
   sequence:
   - data: {}
-    entity_id: switch.kitchen_led_zha_group_0x0002
     service: switch.turn_on
+    target:
+      device_id:
+      - 7e6278f5278b4cb592a626fadb78caa3
+      - ea627a414cfd4cd894a753acc9f4d9d1
+      - 47beee55d2bb452895b08e402fe76915
+      - 4319ad5bba314ac0a71718b6ac2ea1fc
+  mode: single
 '1580666130293':
   alias: Turn off Kitchen Lights
   sequence:
   - data: {}
-    entity_id: switch.kitchen_led_zha_group_0x0002
     service: switch.turn_off
+    target:
+      device_id:
+      - ea627a414cfd4cd894a753acc9f4d9d1
+      - 47beee55d2bb452895b08e402fe76915
+      - 4319ad5bba314ac0a71718b6ac2ea1fc
+      - 7e6278f5278b4cb592a626fadb78caa3
+  mode: single
 '1581635745828':
   alias: Kitchen Radio Kerrang
   sequence:
-  - data:
+  - service: media_player.select_source
+    data:
       source: Kerrang! Radio
-    entity_id: media_player.kitchen_sonos
-    service: media_player.select_source
+    target:
+      device_id: a3267ebbe2764c6989d5ebe1d7b9554a
   - data:
-      volume: 0.12
-    entity_id: media_player.kitchen_sonos
+      volume_level: 0.12
     service: media_player.volume_set
+    target:
+      device_id: a3267ebbe2764c6989d5ebe1d7b9554a
+  - delay:
+      hours: 0
+      minutes: 30
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.select_source
+    data:
+      source: LBC London
+    target:
+      device_id: a3267ebbe2764c6989d5ebe1d7b9554a
+  - delay:
+      hours: 1
+      minutes: 20
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.media_stop
+    data: {}
+    target:
+      device_id: a3267ebbe2764c6989d5ebe1d7b9554a
+  mode: single
+  icon: mdi:radio
 '1590491431704':
   alias: Toggle Kitchen Lights
   sequence:
-  - device_id: 7e6278f5278b4cb592a626fadb78caa3
+  - type: toggle
+    device_id: 7e6278f5278b4cb592a626fadb78caa3
+    entity_id: switch.breakfast_bar_on_off
     domain: switch
-    entity_id: switch.ewelink_sa_003_zigbee_716e621b_on_off
-    type: toggle
   - device_id: ea627a414cfd4cd894a753acc9f4d9d1
     domain: switch
     entity_id: switch.ewelink_sa_003_zigbee_7073431d_on_off
@@ -63,16 +102,18 @@ door_bell_for_chris:
     data: {}
     entity_id: media_player.soundtouch_chris
   - data:
-      media_content_id: http://192.168.34.104/files/doorsoff.mp3
+      media_content_id: http://hassfiles:81/doorsoff.mp3
       media_content_type: MUSIC
-    entity_id: media_player.soundtouch_chris
     service: media_player.play_media
+    target:
+      entity_id: media_player.soundtouch_chris
   - delay: 00:00:06
   - data:
-      media_content_id: http://192.168.34.104/files/doorbell-7.mp3
+      media_content_id: http://hassfiles:81/doorbell-7.mp3
       media_content_type: MUSIC
-    entity_id: media_player.soundtouch_chris
     service: media_player.play_media
+    target:
+      entity_id: media_player.soundtouch_chris
   - delay: 00:00:05
   - service: media_player.turn_off
     data: {}
@@ -93,10 +134,11 @@ adrian_is_home:
     entity_id: media_player.dinning
     service: media_player.volume_up
   - data:
-      media_content_id: http://192.168.34.104/files/heresjohnny.mp3
+      media_content_id: http://192.168.34.104:81/heresjohnny.mp3
       media_content_type: MUSIC
-    entity_id: media_player.dinning
     service: media_player.play_media
+    target:
+      entity_id: media_player.dinning
   - delay: 00:00:05
   - data: {}
     entity_id: media_player.dinning
@@ -149,3 +191,113 @@ camera_garage_notification:
         - www/snapshot/snapshot_{{ entity_id.name }}.jpg
   mode: single
   icon: mdi:cctv
+doorbell_with_volume:
+  alias: Doorbell With Volume
+  sequence:
+  - service: media_player.turn_on
+    target:
+      device_id:
+      - de4524ae049e11eb96f4a53eb8d4021c
+      - a3267ebbe2764c6989d5ebe1d7b9554a
+      - ed654175c0254d6fb94bd6cdf6015db3
+    data: {}
+  - service: input_number.set_value
+    data:
+      entity_id: input_number.current_volume_sonos_one
+      value: '{{ state_attr(''media_player.sonos_one'',''volume_level'') }}'
+  - service: input_number.set_value
+    data:
+      entity_id: input_number.current_volume_bedroom_sonos
+      value: '{{ state_attr(''media_player.bedroom_sonos'',''volume_level'') }}'
+  - service: input_number.set_value
+    data:
+      entity_id: input_number.current_volume_kitchen_sonos
+      value: '{{ state_attr(''media_player.kitchen_sonos'',''volume_level'') }}'
+  - service: sonos.snapshot
+    data:
+      entity_id: media_player.bedroom_sonos
+      with_group: true
+  - service: sonos.snapshot
+    data:
+      entity_id: media_player.kitchen_sonos
+  - service: sonos.snapshot
+    data:
+      entity_id: media_player.sonos_one
+  - service: media_player.volume_set
+    target:
+      device_id: ed654175c0254d6fb94bd6cdf6015db3
+    data:
+      volume_level: 0.21
+  - service: media_player.volume_set
+    target:
+      device_id:
+      - de4524ae049e11eb96f4a53eb8d4021c
+      - a3267ebbe2764c6989d5ebe1d7b9554a
+    data:
+      volume_level: 0.51
+  - service: media_player.play_media
+    target:
+      device_id:
+      - de4524ae049e11eb96f4a53eb8d4021c
+      - ed654175c0254d6fb94bd6cdf6015db3
+      - a3267ebbe2764c6989d5ebe1d7b9554a
+    data:
+      media_content_type: music
+      media_content_id: http://hassfiles:81/doorbell-2.mp3
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 11
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: '{{ states("input_number.current_volume_sonos_one")|float }}'
+    target:
+      entity_id: media_player.sonos_one
+  - service: media_player.volume_set
+    data:
+      volume_level: '{{ states("input_number.current_volume_kitchen_sonos")|float
+        }}'
+    target:
+      entity_id: media_player.kitchen_sonos
+  - service: media_player.volume_set
+    data:
+      volume_level: '{{ states("input_number.current_volume_bedroom_sonos")|float
+        }}'
+    target:
+      entity_id: media_player.bedroom_sonos
+  - service: sonos.restore
+    data:
+      entity_id: media_player.bedroom_sonos
+  - service: sonos.restore
+    data:
+      entity_id: media_player.kitchen_sonos
+  - service: sonos.restore
+    data:
+      entity_id: media_player.sonos_one
+  mode: single
+  icon: mdi:doorbell
+toggle_sonos_weekday_alarm:
+  alias: Toggle Sonos Weekday alarm
+  sequence:
+  - type: toggle
+    device_id: ed654175c0254d6fb94bd6cdf6015db3
+    entity_id: switch.sonos_alarm_224
+    domain: switch
+  mode: single
+  icon: mdi:alarm-check
+toggle_sonos_early_alarm:
+  alias: Toggle Sonos early alarm
+  sequence:
+  - type: toggle
+    device_id: ed654175c0254d6fb94bd6cdf6015db3
+    entity_id: switch.sonos_alarm_1
+    domain: switch
+  mode: single
+  icon: mdi:alarm
+text_to_speech_on_sonos:
+  alias: Text-to-Speech on Sonos
+  use_blueprint:
+    path: Talvish/sonos_say.yaml
+  icon: mdi:speaker-message
+  mode: single

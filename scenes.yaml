@@ -2,14 +2,39 @@
   name: Set Kitchen Sonos for AM radio
   entities:
     media_player.kitchen_sonos:
-      friendly_name: Kitchen Sonos
-      media_title: kerrang.aac?amsparams=playerid:BMUK_tunein;skey:1581633436&awparams=loggedin:false
+      source_list:
+      - Absolute Classic Rock
+      - BBC Essex
+      - BBC Radio 2
+      - BBC Radio 5 live
+      - BBC Radio 5 live sports extra
+      - Kerrang! Radio
+      - LBC London
+      - Planet Rock
+      - Radio X UK
+      - Sympathy For The Devil
+      - talkSPORT
+      - talkSPORT 2
+      group_members:
+      volume_level: 0.12
+      is_volume_muted: false
+      media_content_id: aac://https://stream-al.planetradio.co.uk/kerrang.aac?direct=true&aw_0_1st.playerid=BMUK_Sonos&aw_0_1st.skey=1646770026
+      media_content_type: music
+      media_title: Slash
+      media_artist: Call Off The Dogs
+      media_channel: Kerrang! Radio
       shuffle: false
+      repeat: 'off'
       sonos_group:
       - media_player.kitchen_sonos
-      source: Kerrang! Radio
+      queue_position: 1
+      queue_size: 1
+      entity_picture: /api/media_player_proxy/media_player.kitchen_sonos?token=dee0ff5512286f3282ffa11fa909b72ac0b442139670128f6df0dbbe8233d012&cache=9145dae5920d7439
+      icon: mdi:cast-audio
+      friendly_name: Kitchen Sonos
+      supported_features: 981567
       state: playing
-      volume_level: 0.12
+  icon: mdi:radio
 - id: '1580799453247'
   name: Turn off Kitchen Sonos
   entities:
