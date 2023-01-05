@@ -195,7 +195,7 @@ notify:
 #    name: LivingRoom
 #    host: 192.168.34.14
   - platform: msteams
-    url: https://outlook.office.com/webhook/24ff624b-6a1f-4526-9e89-087457d7f2b5@fc36efd4-da9d-4f68-a0d4-7fb5ae5308d1/IncomingWebhook/e150a1206e1a42ab88001442e7759055/65835691-8235-4fa7-96fe-88efff70d7da
+    url: !secret msteams_url
 #  - platform: nfandroidtv
 #    name: ChrisTV
 #    host: 192.168.34.141
