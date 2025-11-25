@@ -1,7 +1,7 @@
 - id: '1580665515337'
   name: Set Kitchen Sonos for AM radio
   entities:
-    media_player.kitchen_sonos:
+    media_player.kitchen_sonos_sonos:
       source_list:
       - Absolute Classic Rock
       - BBC Essex
@@ -26,7 +26,7 @@
       shuffle: false
       repeat: 'off'
       sonos_group:
-      - media_player.kitchen_sonos
+      - media_player.kitchen_sonos_sonos
       queue_position: 1
       queue_size: 1
       entity_picture: /api/media_player_proxy/media_player.kitchen_sonos?token=dee0ff5512286f3282ffa11fa909b72ac0b442139670128f6df0dbbe8233d012&cache=9145dae5920d7439
@@ -38,8 +38,90 @@
 - id: '1580799453247'
   name: Turn off Kitchen Sonos
   entities:
-    media_player.kitchen_sonos:
+    media_player.kitchen_sonos_sonos:
       friendly_name: Kitchen Sonos
       is_volume_muted: false
       state: paused
       volume_level: 0.12
+- id: '1675792917405'
+  name: Living Room Cinema Lighting
+  entities:
+    light.sengled_z01_a60eae27_b62f0403_level_light_color_on_off:
+      min_color_temp_kelvin: 2702
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 370
+      supported_color_modes:
+      - color_temp
+      color_mode: color_temp
+      brightness: 79
+      color_temp_kelvin: 2702
+      color_temp: 370
+      hs_color:
+      - 28.391
+      - 65.659
+      rgb_color:
+      - 255
+      - 167
+      - 88
+      xy_color:
+      - 0.524
+      - 0.388
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Living Room Stand Lamp Light
+      supported_features: 40
+      state: 'on'
+    light.signify_netherlands_b_v_lwe007:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 76
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Table Lamp
+      supported_features: 40
+      state: 'on'
+  icon: mdi:theater
+  metadata: {}
+- id: '1675795495528'
+  name: Living Room Normal Lighting
+  entities:
+    light.sengled_z01_a60eae27_b62f0403_level_light_color_on_off:
+      min_color_temp_kelvin: 2702
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 370
+      supported_color_modes:
+      - color_temp
+      color_mode: color_temp
+      brightness: 254
+      color_temp_kelvin: 2702
+      color_temp: 370
+      hs_color:
+      - 28.391
+      - 65.659
+      rgb_color:
+      - 255
+      - 167
+      - 88
+      xy_color:
+      - 0.524
+      - 0.388
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Living Room Stand Lamp Light
+      supported_features: 40
+      state: 'on'
+    light.signify_netherlands_b_v_lwe007:
+      supported_color_modes:
+      - brightness
+      color_mode: brightness
+      brightness: 254
+      off_with_transition: false
+      off_brightness:
+      friendly_name: Table Lamp
+      supported_features: 40
+      state: 'on'
+  icon: mdi:lamps
+  metadata: {}

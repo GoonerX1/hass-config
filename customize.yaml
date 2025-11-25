@@ -1,9 +1,5 @@
 #person.adrian_chapman:
   #entity_picture: /local/AdrianChapman.png
-binary_sensor.192_168_34_18:
-  icon: mdi:cctv
-device_tracker.u7lr:
-  icon: mdi:wifi
 sensor.season:
   templates:
     friendly_name_template: return state

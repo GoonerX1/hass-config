@@ -2,4 +2,13 @@
     name: Household Members
     entities:
       - person.adrian_chapman
-      - person.chris_allen
+      - person.hannah_vaugon
+      - person.harry_hutley
+  sonos_alarm:
+    name: SONOS ALARM
+    icon: mdi:alarm
+    entities:
+      - switch.sonos_alarm_1
+      - switch.sonos_alarm_224
+      - switch.sonos_alarm_427
+      - switch.sonos_alarm_1065

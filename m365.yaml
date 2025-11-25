@@ -1,0 +1,31 @@
+o365:
+  accounts:
+    - account_name: adrian
+      client_id: !secret m365_id
+      client_secret: !secret m365_secret
+      alt_auth_method: False
+      enable_update: True
+      enable_calendar: True
+      email_sensor:
+        - name: inbox
+          max_items: 2
+          is_unread: True
+          download_attachments: False
+      query_sensors:
+        - name: "Example"
+          folder: "Inbox/Test_Inbox" #Default is Inbox
+          from: "adrian@x1ade.co.uk"
+          subject_contains: "Guntrader Media Ltd"
+          has_attachment: True
+          max_items: 2
+          is_unread: True
+      status_sensors: # Cannot be used for personal accounts
+        - name: "User Teams Status"
+      chat_sensors: # Cannot be used for personal accounts
+        - name: "User Chat"
+      todo_sensors:
+        enabled: True
+        enable_update: True # set this to true if you want to be able to create new todos
+    - account_name: Account2
+      client_secret: "xx.xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      client_id: "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx"

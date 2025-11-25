@@ -1,0 +1,77 @@
+#- platform: mpd
+#  host: 192.168.34.22
+#- platform: snapcast
+#  host: 192.168.34.22
+#- platform: snapcast
+#  host: 192.168.34.123
+#  - platform: androidtv
+#    scan_interval: 60
+#    name: Bedroom Fire TV
+#    device_class: androidtv
+#    #adbkey: "/config/adb/adbkey"
+#    host: 192.168.34.138
+#    adb_server_ip: 127.0.0.1
+#    adb_server_port: 5037
+#    state_detection_rules:
+#      'com.netflix.ninja':
+#        - 'media_session_state'
+#      'com.spotify.tv.android':
+#        - 'standby'
+#      'com.plexapp.android':
+#        - 'playing':
+#            'media_session_state': 3  # this indentation is important!
+#            'wake_lock_size': 3       # this indentation is important!
+#        - 'paused':
+#            'media_session_state': 3  # this indentation is important!
+#            'wake_lock_size': 1       # this indentation is important!
+#        - 'standby'
+#      'com.dvblogic.tvmosaic':
+#        - 'standby'
+#      'com.amazon.tv.launcher':
+#        - 'standby'
+#      'com.amazon.avod':
+#        - 'playing':
+#            'wake_lock_size': 4  # this indentation is important!
+#        - 'playing':
+#            'wake_lock_size': 3  # this indentation is important!
+#        - 'paused':
+#            'wake_lock_size': 2  # this indentation is important!
+#        - 'paused':
+#            'wake_lock_size': 1  # this indentation is important!
+#        - 'standby'
+ # - platform: denonavr
+ #   host: 192.168.34.125
+ #   name: OfficeAVR
+ #   show_all_sources: true
+ #   timeout: 5
+#  - platform: soundtouch
+#    host: 192.168.34.110
+#    port: 8090
+#    name: Soundtouch Chris
+
+- platform: universal
+  name: sony_tv_livingroom
+  unique_id: sony_tv_livingroom
+  children:
+    - media_player.sony_xr_55a84j
+    - media_player.sony_bravia_tv_2
+    - media_player.living_room_tv
+  active_child_template: >
+    {% if is_state_attr('media_player.sony_xr_55a84j', 'app_name', 'TV') %}
+       media_player.sony_bravia_tv_2
+    {% else %}
+       media_player.sony_xr_55a84j
+    {% endif %}
+- platform: universal
+  name: sony_tv_diningroom
+  unique_id: sony_tv_diningroom
+  children:
+    - media_player.kd_49xf9005
+    - media_player.dinning_room_tv
+    - media_player.dining_room_tv
+  active_child_template: >
+    {% if is_state_attr('media_player.kd_49xf9005', 'app_name', 'TV') %}
+       media_player.dinning_room_tv
+    {% else %}
+       media_player.kd_49xf9005
+    {% endif %}

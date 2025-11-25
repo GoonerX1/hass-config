@@ -4,23 +4,42 @@ frontend:
   themes: !include_dir_merge_named themes
   
 http:
- server_port: 8123  
+ #server_port: 8123  
  #ssl_certificate: /ssl/fullchain.pem
  #ssl_key: /ssl/privkey.pem
  #base_url: https://hassio.x1ade.co.uk:8123
- ip_ban_enabled: true
+ use_x_forwarded_for: true
+ trusted_proxies:
+   - 127.0.0.1
+   - 192.168.34.0/24
+   - 95.172.225.138
+   - 172.30.33.12
+ ip_ban_enabled: false
  login_attempts_threshold: 5
 
 homeassistant:
   customize: !include customize.yaml
+  packages: !include_dir_named packages
+  #template: !include_dir_merge_list templates/
 
-#discovery:
-  #enable: dlna_dmr
+group: !include groups.yaml
+automation ui: !include automations.yaml
+automation manual: !include_dir_merge_list automation/
+script: !include scripts.yaml
+scene: !include scenes.yaml
+sensor: !include sensors.yaml
+media_player: !include media_players.yaml
+template: !include template.yaml
+intent: !include intents.yaml
 
 logger:
   default: error
-  logs:
-    homeassistant.components.mqtt: info
+  #logs:
+    #homeassistant.components.mqtt: info
+    #aiounifi: debug
+    #homeassistant.components.unifi: debug
+    #homeassistant.components.device_tracker.unifi: debug
+    #homeassistant.components.switch.unifi: debug
     #homeassistant.components.zha.light: debug
 #   homeassistant.components.rfxtrx: debug
 #   pydeconz: debug
@@ -37,56 +56,23 @@ logger:
     #AIOGitHubAPI: debug
     #homeassistant.components.smartthings: debug
 
-#zha_map:
+spotcast:
+  sp_dc: !secret sp_dc
+  sp_key: !secret sp_key
+  country: GB #optional, added in 3.6.24
+  
 stream:
-#camera:
-#  - platform: generic
-#    name: G4 Doorbell
-#    stream_source: rtsps://192.168.34.1:7441/MlEEjklAdKLN7Wvl?enableSrtp
-#    still_image_url: https://hassio.x1ade.co.uk:8123/local/2RMDoorbellG4.jpg
-#    verify_ssl: false
-    
+  
 tts:
   - platform: google_translate
     service_name: google_translate_say
 
-group: !include groups.yaml
-automation: !include automations.yaml
-#automation: !include_dir_merge_list automation
-script: !include scripts.yaml
-scene: !include scenes.yaml
-
-binary_sensor:
-  - platform: workday
-    country: GB
-    province: England
-    workdays: [mon, tue, wed, thu, fri]
-    excludes: [sat, sun, holiday]
-    add_holidays:
-      - '2022-09-12'
-      - '2022-09-13'
-      - '2022-09-14'
-      - '2022-09-15'
-      - '2022-09-16'
-      - '2022-12-19'
-      - '2022-12-20'
-      - '2022-12-21'
-      - '2022-12-22'
-      - '2022-12-23'
-      - '2022-12-26'
-      - '2022-12-27'
-      - '2022-12-28'
-      
-  - platform: template
-    sensors:
-      camera_garage_motion_detect:
-        value_template: "{{ is_state ( 'camera.diskstation_reolink_rlc_820a', 'recording' ) }}"
-
 device_tracker:
-  #- platform: bluetooth_tracker
-  #  track_new_devices: true
-  #- platform: bluetooth_le_tracker
-   # track_battery: true
+#  - platform: bluetooth_tracker
+  - platform: bluetooth_le_tracker
+    track_battery: true
+    track_new_devices: false
+    interval_seconds: 30
 input_boolean:
   night_mode:
     name: "Night Mode"
@@ -95,87 +81,6 @@ input_boolean:
     name: "Enable light replay"
     icon: mdi:lightbulb-group-outline
 
-rfxtrx:
-  device: /dev/serial/by-id/usb-RFXCOM_RFXtrx433XL_DO4GU7KW-if00-port0
-  automatic_add: false
-#  signal_repetitions: 1
-  devices:
-  # 1st_Landing_Blind
-    071a000001010101:
-  # Office
-    071a000001010301:
-  # Living_Room
-    071a000001010202:
-  # Dinning Venetian
-    071a000001020301:
-    
-panel_custom:
-  - name: custom-panel-zigzag
-    sidebar_title: Zigzag
-    sidebar_icon: mdi:zigbee
-    url_path: zigzag
-    module_url: /local/zigzag/zigzag-panel.esm.js
-    trust_external_script: true
-    config:
-      who: world
-      zigzag:
-        plugin-path: "/local/zigzag/plugins"
-        plugin-data:
-          type: "file"
-          filepath: "/local/zigzag/devices.json"
-        plugin-layout:
-          type: "d3"
-        plugin-render:
-          type: "three"
-
-panel_iframe:
-  mdiindex:
-    title: MDI Icon Index
-    icon: mdi:vector-square
-    url: https://cdn.rawgit.com/james-fry/home-assistant-mdi/efd95d7a/home-assistant-mdi.html
-    
-#spotify:
-#  client_id: !secret spotify_id
-#  client_secret: !secret spotify_secret
-
-#camera:
- # - platform: synology
-  #  url: https://ds.x1ade.co.uk:5001
-   # username: !secret synology_hassio
-    #password: !secret syn_sur_password
-    #timeout: 15
-    #verify_ssl: false
-
-sensor:
- - platform: time_date
-   display_options:
-      - 'time'
-      - 'date'
-      - 'date_time'
- - platform: lastfm
-   api_key: !secret lastfm_api
-   users:
-     - x1ade
- - platform: plex_recently_added
-   token: !secret plex_token
-   host: 192.168.34.32
-   port: 32400
- - platform: sonarr_upcoming_media
-   api_key: !secret sonarr_api
-   host: 192.168.34.11
-   port: 8989
-   days: 7
-   ssl: false
-   max: 10 
- - platform: radarr_upcoming_media
-   api_key: !secret radarr_api
-   host: 127.0.0.1
-   port: 7878
-   days: 14
-   ssl: false
-   theaters: false
-   max: 10
-    
 notify:
   - name: email_alert
     platform: smtp
@@ -186,73 +91,14 @@ notify:
     sender: hassio@x1ade.co.uk
     recipient: adrian@x1ade.co.uk
     sender_name: HassIO
-  - platform: html5
-    name: Hass.IO X1ADE
-    vapid_pub_key: !secret vapid_pub_key
-    vapid_prv_key: !secret vapid_prv_key
-    vapid_email: ade@x1ade.co.uk
-#  - platform: nfandroidtv
-#    name: LivingRoom
-#    host: 192.168.34.14
-  - platform: msteams
-    url: !secret msteams_url
-#  - platform: nfandroidtv
-#    name: ChrisTV
-#    host: 192.168.34.141
-    
-#media_player:
-#  - platform: androidtv
-#    scan_interval: 60
-#    name: Bedroom Fire TV
-#    device_class: androidtv
-#    #adbkey: "/config/adb/adbkey"
-#    host: 192.168.34.138
-#    adb_server_ip: 127.0.0.1
-#    adb_server_port: 5037
-#    state_detection_rules:
-#      'com.netflix.ninja':
-#        - 'media_session_state'
-#      'com.spotify.tv.android':
-#        - 'standby'
-#      'com.plexapp.android':
-#        - 'playing':
-#            'media_session_state': 3  # this indentation is important!
-#            'wake_lock_size': 3       # this indentation is important!
-#        - 'paused':
-#            'media_session_state': 3  # this indentation is important!
-#            'wake_lock_size': 1       # this indentation is important!
-#        - 'standby'
-#      'com.dvblogic.tvmosaic':
-#        - 'standby'
-#      'com.amazon.tv.launcher':
-#        - 'standby'
-#      'com.amazon.avod':
-#        - 'playing':
-#            'wake_lock_size': 4  # this indentation is important!
-#        - 'playing':
-#            'wake_lock_size': 3  # this indentation is important!
-#        - 'paused':
-#            'wake_lock_size': 2  # this indentation is important!
-#        - 'paused':
-#            'wake_lock_size': 1  # this indentation is important!
-#        - 'standby'
- # - platform: denonavr
- #   host: 192.168.34.125
- #   name: OfficeAVR
- #   show_all_sources: true
- #   timeout: 5
-#  - platform: soundtouch
-#    host: 192.168.34.110
-#    port: 8090
-#    name: Soundtouch Chris
-
-#ifttt:
-#  key: !secret ifttt_api_key
-#somfy:
-#  client_id: !secret somfy_key
-#  client_secret: !secret somfy_secret
-# Example configuration.yaml entry with exclude
-
+  - name: WhatsApp
+    platform: rest
+    resource: https://api.callmebot.com/whatsapp.php
+    data:
+      source: HA
+      phone: !secret adrianphone   #enter your phone number here
+      apikey: !secret whatsappcallmebotapi        #enter your apikey here (see Setup above)
+      
 recorder:
   purge_keep_days: 21
   db_url: !secret recorder_db_url
@@ -270,13 +116,56 @@ recorder:
 input_number:
   current_volume_sonos_one:
     name: 'Current volume Living Room'
+    #unique_id: 1231231
     min: 0
     max: 1
   current_volume_kitchen_sonos:
-    name: 'Current colume kitchen sonos'
+    name: 'Current volume kitchen sonos'
+    #unique_id: 1231232
     min: 0
     max: 1
   current_volume_bedroom_sonos:
     name: 'Current volume bedroom sonos'
+    #unique_id: 1231233
     min: 0
     max: 1
+#  alarm_snooze:
+ #   name: Snooze Duration
+  #  min: 5 #optional
+   # max: 30 #optional
+    #step: 5 #optional
+    #icon: mdi:sleep #optional
+  #alarm_clock_hour:
+   # name: Hour
+    #icon: mdi:timer #optional
+    #min: 4 #optional
+    #max: 10 #optional
+    #step: 1 #optional
+  #alarm_clock_minute:
+   # name: Minute
+    #icon: mdi:timer #optional
+    #min: 0 #optional
+    #max: 55 #optional
+    #step: 5 #optional
+  #alarm_volume:
+   # name: Alarm Volume
+    #icon: mdi:volume-high #optional
+    #min: 0.0 #optional
+    #max: 0.3 #optional
+    #mode: box #optional
+# Example configuration.yaml entry
+#zabbix:
+#  host: 192.168.7.93
+#  path: /
+#  ssl: false
+#  username: !secret zabbix_usr
+#  password: !secret zabbix_pwd
+#  publish_states_host: homeassistant
+#  publish_string_states: true
+#  exclude:
+#    domains:
+#      - device_tracker
+#    entities:
+#      - sun.sun
+#      - sensor.time
+

@@ -1,0 +1,8 @@
+sensor:
+  - name: Weather voice
+    state: >
+      {% if is_state('weather.home', 'partlycloudy') %}
+          partly cloudy
+      {% else %}
+          {{ states('weather.home') | replace('-', ' ') }}
+      {% endif %}

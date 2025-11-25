@@ -1,0 +1,25 @@
+intent_script:
+  WeatherToday:
+    speech:
+      text: >
+        The weather today is {{ states('weather.home') }} with a high of {{ state_attr('weather.home', 'temperature') }}°C and a low of {{ state_attr('weather.home', 'dew_point') }}°C.
+        Pollen levels are: Tree - {{ states('sensor.home_tree_pollen_day_0') }}, Grass - {{ states('sensor.home_grass_pollen_day_0') }}, Ragweed - {{ states('sensor.home_ragweed_pollen_day_0') }}.
+  WeatherTomorrow:
+    speech:
+      text: >
+        Tomorrow's weather will be {{ state_attr('weather.home', 'forecast')[1].condition }} with a high of {{ state_attr('weather.home', 'forecast')[1].temperature }}°C and a low of {{ state_attr('weather.home', 'forecast')[1].templow }}°C.
+        Pollen forecast: Tree - {{ states('sensor.tree_pollen_tomorrow') }}, Grass - {{ states('sensor.grass_pollen_tomorrow') }}, Ragweed - {{ states('sensor.ragweed_pollen_tomorrow') }}.
+  WeatherWeekend:
+    speech:
+      text: >
+        This weekend, Saturday will be {{ state_attr('weather.home', 'forecast')[5].condition }} with a high of {{ state_attr('weather.home', 'forecast')[5].temperature }}°C.
+        Sunday will be {{ state_attr('weather.home', 'forecast')[6].condition }} with a high of {{ state_attr('weather.home', 'forecast')[6].temperature }}°C.
+        Pollen levels today are: Tree - {{ states('sensor.tree_pollen_today') }}, Grass - {{ states('sensor.grass_pollen_today') }}, Ragweed - {{ states('sensor.ragweed_pollen_today') }}.
+  WeatherWeek:
+    speech:
+      text: >
+        Here's the 7-day weather outlook:
+        {% for day in state_attr('weather.home', 'forecast') %}
+          {{ day.datetime | as_datetime | as_local | timestamp_custom('%A') }}: {{ day.condition }}, high of {{ day.temperature }}°C, low of {{ day.templow }}°C.
+        {% endfor %}
+        Today's pollen levels: Tree - {{ states('sensor.tree_pollen_today') }}, Grass - {{ states('sensor.grass_pollen_today') }}, Ragweed - {{ states('sensor.ragweed_pollen_today') }}.

@@ -1,19 +1,13 @@
 '1580663632136':
   alias: Blink Trigger Camera Update
   sequence:
-  - data: {}
-    service: blink.trigger_camera
+  - action: camera.snapshot
     target:
       entity_id:
       - camera.blink_back_gate
-  - delay: 00:00:10
-  - data: {}
-    service: blink.trigger_camera
-    target:
-      entity_id:
       - camera.blink_front_door
+    data: {}
   - delay: 00:00:10
-  - service: blink.blink_update
   mode: single
 '1580666071205':
   alias: Turn on Kitchen Lights
@@ -23,9 +17,12 @@
     target:
       device_id:
       - 7e6278f5278b4cb592a626fadb78caa3
-      - ea627a414cfd4cd894a753acc9f4d9d1
-      - 47beee55d2bb452895b08e402fe76915
-      - 4319ad5bba314ac0a71718b6ac2ea1fc
+    enabled: false
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id:
+      - light.kitchen_light_switch_light_2
   mode: single
 '1580666130293':
   alias: Turn off Kitchen Lights
@@ -34,10 +31,13 @@
     service: switch.turn_off
     target:
       device_id:
-      - ea627a414cfd4cd894a753acc9f4d9d1
-      - 47beee55d2bb452895b08e402fe76915
-      - 4319ad5bba314ac0a71718b6ac2ea1fc
       - 7e6278f5278b4cb592a626fadb78caa3
+    enabled: false
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id:
+      - light.kitchen_light_switch_light_2
   mode: single
 '1581635745828':
   alias: Kitchen Radio Kerrang
@@ -73,52 +73,6 @@
       device_id: a3267ebbe2764c6989d5ebe1d7b9554a
   mode: single
   icon: mdi:radio
-'1590491431704':
-  alias: Toggle Kitchen Lights
-  sequence:
-  - type: toggle
-    device_id: 7e6278f5278b4cb592a626fadb78caa3
-    entity_id: switch.breakfast_bar_on_off
-    domain: switch
-  - device_id: ea627a414cfd4cd894a753acc9f4d9d1
-    domain: switch
-    entity_id: switch.ewelink_sa_003_zigbee_7073431d_on_off
-    type: toggle
-  - device_id: 4319ad5bba314ac0a71718b6ac2ea1fc
-    domain: switch
-    entity_id: switch.ewelink_sa_003_zigbee_9e85431d_on_off
-    type: toggle
-  - device_id: 47beee55d2bb452895b08e402fe76915
-    domain: switch
-    entity_id: switch.ewelink_sa_003_zigbee_2b0b441d_on_off
-    type: toggle
-  mode: single
-door_bell_for_chris:
-  alias: Door Bell for Chris
-  icon: mdi:doorbell
-  mode: single
-  sequence:
-  - service: media_player.turn_on
-    data: {}
-    entity_id: media_player.soundtouch_chris
-  - data:
-      media_content_id: http://hassfiles:81/doorsoff.mp3
-      media_content_type: MUSIC
-    service: media_player.play_media
-    target:
-      entity_id: media_player.soundtouch_chris
-  - delay: 00:00:06
-  - data:
-      media_content_id: http://hassfiles:81/doorbell-7.mp3
-      media_content_type: MUSIC
-    service: media_player.play_media
-    target:
-      entity_id: media_player.soundtouch_chris
-  - delay: 00:00:05
-  - service: media_player.turn_off
-    data: {}
-    entity_id: media_player.soundtouch_chris
-  max: 10
 adrian_is_home:
   alias: Adrian is home
   icon: mdi:star
@@ -152,129 +106,107 @@ adrian_is_home:
 im_leaving:
   alias: I'm leaving
   sequence:
-  - service: media_player.turn_off
-    data: {}
+  - data: {}
     entity_id: media_player.bedroom_sonos
-  - service: media_player.turn_off
-    data: {}
-    entity_id: media_player.kitchen_sonos
-  - service: media_player.turn_off
-    data: {}
+    action: media_player.turn_off
+  - data: {}
+    entity_id: media_player.kitchen_sonos_sonos
+    action: media_player.turn_off
+  - data: {}
     entity_id: media_player.sonos_one
-  - service: script.turn_on
-    data: {}
+    action: media_player.turn_off
+  - data: {}
     entity_id: script.1580666130293
+    action: script.turn_on
   mode: single
   icon: mdi:exit-to-app
-camera_garage_notification:
-  alias: Camera Garage Notification
-  sequence:
-  - service: camera.snapshot
-    data:
-      filename: www/snapshot/snapshot_{{ entity_id.name }}.jpg
-    entity_id: camera.diskstation_garage
-  - delay: '2'
-  - service: notify.livingroom
-    data:
-      title: DriveWay
-      message: Motion Detected on Driveway
-      data_template:
-        photo:
-        - file: www/snapshot/snapshot_{{ entity_id.name }}.jpg
-          capture: Snapshot
-  - service: notify.email_alert
-    data:
-      title: DriveWay
-      message: Motion Detected on Driveway
-      data_template:
-        images:
-        - www/snapshot/snapshot_{{ entity_id.name }}.jpg
-  mode: single
-  icon: mdi:cctv
 doorbell_with_volume:
   alias: Doorbell With Volume
   sequence:
-  - service: media_player.turn_on
-    target:
+  - target:
       device_id:
       - de4524ae049e11eb96f4a53eb8d4021c
       - a3267ebbe2764c6989d5ebe1d7b9554a
       - ed654175c0254d6fb94bd6cdf6015db3
     data: {}
-  - service: input_number.set_value
-    data:
+    action: media_player.turn_on
+  - data:
       entity_id: input_number.current_volume_sonos_one
       value: '{{ state_attr(''media_player.sonos_one'',''volume_level'') }}'
-  - service: input_number.set_value
-    data:
+    action: input_number.set_value
+  - data:
       entity_id: input_number.current_volume_bedroom_sonos
       value: '{{ state_attr(''media_player.bedroom_sonos'',''volume_level'') }}'
-  - service: input_number.set_value
-    data:
+    action: input_number.set_value
+  - data:
       entity_id: input_number.current_volume_kitchen_sonos
       value: '{{ state_attr(''media_player.kitchen_sonos'',''volume_level'') }}'
-  - service: sonos.snapshot
-    data:
+    action: input_number.set_value
+  - data:
       entity_id: media_player.bedroom_sonos
       with_group: true
-  - service: sonos.snapshot
-    data:
-      entity_id: media_player.kitchen_sonos
-  - service: sonos.snapshot
-    data:
+    action: sonos.snapshot
+  - data:
+      entity_id: media_player.kitchen_sonos_sonos
+    action: sonos.snapshot
+  - data:
       entity_id: media_player.sonos_one
-  - service: media_player.volume_set
-    target:
+    action: sonos.snapshot
+  - target:
       device_id: ed654175c0254d6fb94bd6cdf6015db3
     data:
       volume_level: 0.21
-  - service: media_player.volume_set
-    target:
+    action: media_player.volume_set
+  - target:
       device_id:
       - de4524ae049e11eb96f4a53eb8d4021c
       - a3267ebbe2764c6989d5ebe1d7b9554a
     data:
       volume_level: 0.51
-  - service: media_player.play_media
-    target:
+    action: media_player.volume_set
+  - target:
       device_id:
       - de4524ae049e11eb96f4a53eb8d4021c
       - ed654175c0254d6fb94bd6cdf6015db3
       - a3267ebbe2764c6989d5ebe1d7b9554a
     data:
-      media_content_type: music
-      media_content_id: http://hassfiles:81/doorbell-2.mp3
+      media:
+        media_content_id: http://hassfiles:81/doorbell-2.mp3
+        media_content_type: music
+        metadata: {}
+    action: media_player.play_media
   - delay:
       hours: 0
       minutes: 0
       seconds: 11
       milliseconds: 0
-  - service: media_player.volume_set
-    data:
+  - data:
       volume_level: '{{ states("input_number.current_volume_sonos_one")|float }}'
     target:
       entity_id: media_player.sonos_one
-  - service: media_player.volume_set
-    data:
+    action: media_player.volume_set
+  - data:
       volume_level: '{{ states("input_number.current_volume_kitchen_sonos")|float
         }}'
     target:
-      entity_id: media_player.kitchen_sonos
-  - service: media_player.volume_set
-    data:
+      entity_id:
+      - media_player.kitchen_sonos_sonos
+    action: media_player.volume_set
+  - data:
       volume_level: '{{ states("input_number.current_volume_bedroom_sonos")|float
         }}'
     target:
       entity_id: media_player.bedroom_sonos
-  - service: sonos.restore
-    data:
+    action: media_player.volume_set
+  - data:
       entity_id: media_player.bedroom_sonos
-  - service: sonos.restore
-    data:
-      entity_id: media_player.kitchen_sonos
-  - service: sonos.restore
-    data:
+    action: sonos.restore
+  - data:
+      entity_id: media_player.kitchen_sonos_sonos
+    action: sonos.restore
+  - data:
       entity_id: media_player.sonos_one
+    action: sonos.restore
   mode: single
   icon: mdi:doorbell
 toggle_sonos_weekday_alarm:
@@ -299,5 +231,107 @@ text_to_speech_on_sonos:
   alias: Text-to-Speech on Sonos
   use_blueprint:
     path: Talvish/sonos_say.yaml
+    input:
+      tts_service_name: google_translate_say
   icon: mdi:speaker-message
   mode: single
+tell_hannah_to_get_out_of_bed:
+  alias: Tell Hannah to get out of bed
+  use_blueprint:
+    path: Talvish/sonos_say.yaml
+    input:
+      tts_service_name: google_translate_say
+  mode: single
+  icon: mdi:human-female-dance
+'1708111166653':
+  alias: Text-to-Speech on Sonos
+  use_blueprint:
+    path: Talvish/sonos_say.yaml
+run_hot_water_for_1hr:
+  sequence:
+  - action: tado.set_water_heater_timer
+    metadata: {}
+    data:
+      time_period: 01:00:00
+    target:
+      entity_id: water_heater.hot_water
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.run_hot_water
+  alias: Run Hot Water for 1hr
+  description: ''
+sonos_play_radio_x:
+  sequence:
+  - action: media_player.play_media
+    target:
+      entity_id: media_player.kitchen_sonos_sonos
+    data:
+      media_content_id: FV:2/27
+      media_content_type: favorite_item_id
+    metadata:
+      title: Radio X UK
+      thumbnail: https://dtu8ldmaopof3.cloudfront.net/i/b64aHR0cDovL2hlcmFsZC5tdXNpY3JhZGlvLmNvbS9tZWRpYS8yOTcxN2M5OS0xNGZmLTRlYmEtOTQxMS1kMDEzYWE0YzQ0MDcucG5n_640.jpg
+      media_class: genre
+      children_media_class:
+      navigateIds:
+      - {}
+      - media_content_type: favorites
+        media_content_id: ''
+      - media_content_type: favorites_folder
+        media_content_id: object.item.audioItem.audioBroadcast
+  - action: media_player.volume_set
+    metadata: {}
+    data:
+      volume_level: 0.12
+    target:
+      entity_id: media_player.kitchen_sonos_sonos
+  alias: 'Sonos: Play Radio X'
+  description: ''
+  icon: mdi:radio
+periodic_lights:
+  alias: Periodic Lights
+  sequence:
+  - event: main_periodic_lights
+    event_data:
+      threshold: 255
+      transition: 0
+  description: ''
+voice_weather_forecasts_full_llm_script:
+  alias: Voice - Weather Forecasts - Full LLM script
+  use_blueprint:
+    path: TheFes/3_voice_weather_forecast_full_llm.yaml
+    input:
+      weather_entity: weather.openweathermap
+  description: Fetches the weather forecast for either a part of a day, or one or
+    more full days. In case the weather for the weekend is requested, this means Saturday
+    and Sunday
+voice_weather_forecasts_full_llm_script_2:
+  alias: Voice - Weather Forecasts - Full LLM script
+  use_blueprint:
+    path: TheFes/3_voice_weather_forecast_full_llm.yaml
+    input:
+      weather_entity: weather.openweathermap
+  description: ''
+'1759306568122':
+  alias: Voice - Weather Forecasts - Full LLM script
+  use_blueprint:
+    path: TheFes/3_voice_weather_forecast_full_llm.yaml
+    input:
+      weather_entity: weather.openweathermap
+  description: ''
+'1759306570289':
+  alias: Voice - Weather Forecasts - Full LLM script
+  use_blueprint:
+    path: TheFes/3_voice_weather_forecast_full_llm.yaml
+    input:
+      weather_entity: weather.openweathermap
+  description: ''
+voice_weather_forecasts_full_llm_script_3:
+  alias: Voice - Weather Forecasts - Full LLM script
+  use_blueprint:
+    path: TheFes/3_voice_weather_forecast_full_llm.yaml
+    input:
+      weather_entity: weather.openweathermap
+  description: ''
