@@ -2,20 +2,20 @@ default_config:
 cloud:
 frontend:
   themes: !include_dir_merge_named themes
-  
+
 http:
- #server_port: 8123  
- #ssl_certificate: /ssl/fullchain.pem
- #ssl_key: /ssl/privkey.pem
- #base_url: https://hassio.x1ade.co.uk:8123
- use_x_forwarded_for: true
- trusted_proxies:
-   - 127.0.0.1
-   - 192.168.34.0/24
-   - 95.172.225.138
-   - 172.30.33.12
- ip_ban_enabled: false
- login_attempts_threshold: 5
+  #server_port: 8123
+  #ssl_certificate: /ssl/fullchain.pem
+  #ssl_key: /ssl/privkey.pem
+  #base_url: https://hassio.x1ade.co.uk:8123
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+    - 192.168.34.0/24
+    - 95.172.225.138
+    - 172.30.33.12
+  ip_ban_enabled: false
+  login_attempts_threshold: 5
 
 homeassistant:
   customize: !include customize.yaml
@@ -29,46 +29,46 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 sensor: !include sensors.yaml
 media_player: !include media_players.yaml
-template: !include template.yaml
+template: !include templates.yaml
 intent: !include intents.yaml
 
 logger:
   default: error
   #logs:
-    #homeassistant.components.mqtt: info
-    #aiounifi: debug
-    #homeassistant.components.unifi: debug
-    #homeassistant.components.device_tracker.unifi: debug
-    #homeassistant.components.switch.unifi: debug
-    #homeassistant.components.zha.light: debug
+  #homeassistant.components.mqtt: info
+  #aiounifi: debug
+  #homeassistant.components.unifi: debug
+  #homeassistant.components.device_tracker.unifi: debug
+  #homeassistant.components.switch.unifi: debug
+  #homeassistant.components.zha.light: debug
 #   homeassistant.components.rfxtrx: debug
 #   pydeconz: debug
 #   homeassistant.components.deconz: debug
-    #homeassistant.components.automation: debug
-    #aiounifi: info
-    #homeassistant.components.unifi: info
-    #homeassistant.components.device_tracker.unifi: info
-    #homeassistant.components.switch.unifi: info
-    #homeassistant.components.media_player.spotify: info
-    #custom_components.hacs: debug
-    #hacs: debug
-    #queueman: debug
-    #AIOGitHubAPI: debug
-    #homeassistant.components.smartthings: debug
+#homeassistant.components.automation: debug
+#aiounifi: info
+#homeassistant.components.unifi: info
+#homeassistant.components.device_tracker.unifi: info
+#homeassistant.components.switch.unifi: info
+#homeassistant.components.media_player.spotify: info
+#custom_components.hacs: debug
+#hacs: debug
+#queueman: debug
+#AIOGitHubAPI: debug
+#homeassistant.components.smartthings: debug
 
 spotcast:
   sp_dc: !secret sp_dc
   sp_key: !secret sp_key
   country: GB #optional, added in 3.6.24
-  
+
 stream:
-  
+
 tts:
   - platform: google_translate
     service_name: google_translate_say
 
 device_tracker:
-#  - platform: bluetooth_tracker
+  #  - platform: bluetooth_tracker
   - platform: bluetooth_le_tracker
     track_battery: true
     track_new_devices: false
@@ -91,14 +91,23 @@ notify:
     sender: hassio@x1ade.co.uk
     recipient: adrian@x1ade.co.uk
     sender_name: HassIO
+  - name: email_cv28
+    platform: smtp
+    server: x1ade-co-uk.mail.protection.outlook.com
+    port: 25
+    encryption: starttls
+    timeout: 15
+    sender: hassio@x1ade.co.uk
+    recipient: adrianchapman.cv28@gtmailplus.com
+    sender_name: HassIO
   - name: WhatsApp
     platform: rest
     resource: https://api.callmebot.com/whatsapp.php
     data:
       source: HA
-      phone: !secret adrianphone   #enter your phone number here
-      apikey: !secret whatsappcallmebotapi        #enter your apikey here (see Setup above)
-      
+      phone: !secret adrianphone #enter your phone number here
+      apikey: !secret whatsappcallmebotapi #enter your apikey here (see Setup above)
+
 recorder:
   purge_keep_days: 21
   db_url: !secret recorder_db_url
@@ -111,48 +120,50 @@ recorder:
       - sensor.date_time
       - sensor.time
     #event_types:
-        #  - call_service # Don't record service calls
+    #  - call_service # Don't record service calls
+    entity_globs:
+      - sensor.calciolive_*
 
 input_number:
   current_volume_sonos_one:
-    name: 'Current volume Living Room'
+    name: "Current volume Living Room"
     #unique_id: 1231231
     min: 0
     max: 1
   current_volume_kitchen_sonos:
-    name: 'Current volume kitchen sonos'
+    name: "Current volume kitchen sonos"
     #unique_id: 1231232
     min: 0
     max: 1
   current_volume_bedroom_sonos:
-    name: 'Current volume bedroom sonos'
+    name: "Current volume bedroom sonos"
     #unique_id: 1231233
     min: 0
     max: 1
 #  alarm_snooze:
- #   name: Snooze Duration
-  #  min: 5 #optional
-   # max: 30 #optional
-    #step: 5 #optional
-    #icon: mdi:sleep #optional
-  #alarm_clock_hour:
-   # name: Hour
-    #icon: mdi:timer #optional
-    #min: 4 #optional
-    #max: 10 #optional
-    #step: 1 #optional
-  #alarm_clock_minute:
-   # name: Minute
-    #icon: mdi:timer #optional
-    #min: 0 #optional
-    #max: 55 #optional
-    #step: 5 #optional
-  #alarm_volume:
-   # name: Alarm Volume
-    #icon: mdi:volume-high #optional
-    #min: 0.0 #optional
-    #max: 0.3 #optional
-    #mode: box #optional
+#   name: Snooze Duration
+#  min: 5 #optional
+# max: 30 #optional
+#step: 5 #optional
+#icon: mdi:sleep #optional
+#alarm_clock_hour:
+# name: Hour
+#icon: mdi:timer #optional
+#min: 4 #optional
+#max: 10 #optional
+#step: 1 #optional
+#alarm_clock_minute:
+# name: Minute
+#icon: mdi:timer #optional
+#min: 0 #optional
+#max: 55 #optional
+#step: 5 #optional
+#alarm_volume:
+# name: Alarm Volume
+#icon: mdi:volume-high #optional
+#min: 0.0 #optional
+#max: 0.3 #optional
+#mode: box #optional
 # Example configuration.yaml entry
 #zabbix:
 #  host: 192.168.7.93

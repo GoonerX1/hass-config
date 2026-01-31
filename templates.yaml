@@ -1,0 +1,65 @@
+- sensor:
+    ##### Waste Today ##################################
+    - name: "Waste Today"
+      unique_id: 63c6bde9-1758-4817-b166-093be65c4010
+      state: >
+        {% set waste_type = "Nothing" %}
+        {% set waste_collection_date = as_datetime(state_attr('sensor.upcoming_waste','upcoming')[0].date) %}
+        {% set days_until_collection = (waste_collection_date.date() - now().date()).days %}
+        {% if days_until_collection == 0 %}
+          {% set waste_type = state_attr('sensor.upcoming_waste','upcoming')[0].type %}
+        {% endif %}
+        {{ waste_type }}
+      attributes:
+        date: >
+          {% set date = '' %}
+          {% set waste_collection_date = as_datetime(state_attr('sensor.upcoming_waste','upcoming')[0].date) %}
+          {% set days_until_collection = (waste_collection_date.date() - now().date()).days %}
+          {% if days_until_collection == 0 %}
+            {% set date = state_attr('sensor.upcoming_waste','upcoming')[0].date %}
+          {% endif %}
+          {{ date }}
+        entity_picture: >
+          {% set waste_collection_date = as_datetime(state_attr('sensor.upcoming_waste','upcoming')[0].date) %}
+          {% set days_until_collection = (waste_collection_date.date() - now().date()).days %}
+          {% if days_until_collection == 0 %}
+            {% set picture = state_attr('sensor.upcoming_waste','upcoming')[0].picture %}
+          {% else %}
+            {% set picture = "/local/waste/kliko.png" %}         
+          {% endif %}
+          {{ picture }}
+
+    ##### Waste Tomorrow ##################################
+    - name: "Waste Tomorrow"
+      unique_id: adb7c42a-1f14-4ddf-b213-ac72982f9b2d
+      state: >
+        {% set ns = namespace(waste_type = "Nothing") %}
+        {% for i in range(2) %}
+          {% set waste_collection_date = as_datetime(state_attr('sensor.upcoming_waste','upcoming')[i].date) %}
+          {% set days_until_collection = ((waste_collection_date.date() - now().date()).days) | int %}
+          {% if days_until_collection == 1 %}
+            {% set ns.waste_type = state_attr('sensor.upcoming_waste','upcoming')[i].type %}
+          {% endif %}
+        {% endfor %}
+        {{ ns.waste_type }}
+      attributes:
+        date: >
+          {% set ns = namespace(collection_date = '') %}
+          {% for i in range(2) %}
+            {% set waste_collection_date = as_datetime(state_attr('sensor.upcoming_waste','upcoming')[i].date) %}
+            {% set days_until_collection = ((waste_collection_date.date() - now().date()).days) | int %}
+            {% if days_until_collection == 1 %}
+              {% set ns.collection_date = state_attr('sensor.upcoming_waste','upcoming')[i].date %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.collection_date }}
+        entity_picture: >
+          {% set ns = namespace(picture = '/local/waste/kliko.png') %}
+          {% for i in range(2) %}
+            {% set waste_collection_date = as_datetime(state_attr('sensor.upcoming_waste','upcoming')[i].date) %}
+            {% set days_until_collection = ((waste_collection_date.date() - now().date()).days) | int %}
+            {% if days_until_collection == 1 %}
+              {% set ns.picture = state_attr('sensor.upcoming_waste','upcoming')[i].picture %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.picture }}
