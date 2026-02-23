@@ -55,6 +55,8 @@ logger:
 #queueman: debug
 #AIOGitHubAPI: debug
 #homeassistant.components.smartthings: debug
+shell_command:
+  create_snapshot_dirs: "mkdir -p /config/www/snapshots/{{ year }}/{{ month }}"
 
 spotcast:
   sp_dc: !secret sp_dc

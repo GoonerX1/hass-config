@@ -1737,7 +1737,7 @@
   use_blueprint:
     path: robinsmidsrod/zwavejs-aeon-labs-aeotec-zw130-wallmote-quad-all-scenes-supported.yaml
     input:
-      zwavejs_device: 3c5fa67d9172d77675dd2f72e7ee11f4
+      zwavejs_device: 9074e94c4065cdc34c3275848d3afa78
       tap_top_right_actions:
       - data:
           brightness_pct: 100
@@ -1745,12 +1745,6 @@
         target:
           entity_id: light.yeelight_lamp9_0x1d64e9b8
           device_id: e04c36055c27bc8fe3480960b40cfc70
-      - action: switch.turn_on
-        metadata: {}
-        data: {}
-        target:
-          entity_id: switch.lamp
-        enabled: false
       tap_top_left_actions:
       - data:
           brightness: 255
@@ -1765,10 +1759,11 @@
           entity_id: cover.rfy_010102_2
         data: {}
       tap_bottom_right_actions:
-      - data: {}
+      - action: light.toggle
+        metadata: {}
         target:
-          device_id: 36c2bf048f36d87ee0e11cbc7d175d34
-        action: switch.toggle
+          entity_id: light.back_door_light_switch
+        data: {}
       tap_bottom_left_actions:
       - action: switch.toggle
         metadata: {}
@@ -2547,11 +2542,6 @@
         data: {}
         target:
           entity_id: input_boolean.turn_on_heating
-      - action: input_boolean.turn_off
-        metadata: {}
-        target:
-          entity_id: input_boolean.turn_off_heating
-        data: {}
     - conditions:
       - condition: trigger
         id:
@@ -2579,11 +2569,6 @@
         target:
           entity_id:
           - input_boolean.turn_on_heating
-      - action: input_boolean.turn_on
-        metadata: {}
-        target:
-          entity_id: input_boolean.turn_off_heating
-        data: {}
   mode: single
 - id: '1742292813251'
   alias: Restart Protect Devices when offline
@@ -2710,6 +2695,7 @@
     conditions:
     - condition: time
       before: '22:00:00'
+      after: '15:00:00'
     - condition: numeric_state
       entity_id: sensor.garden_temperature
       below: 13
@@ -2717,6 +2703,7 @@
       entity_id: input_boolean.its_dark
       state:
       - 'on'
+      enabled: false
   - condition: not
     conditions:
     - condition: state
@@ -2786,10 +2773,10 @@
     enabled: false
   - trigger: state
     entity_id:
-    - input_boolean.turn_off_heating
+    - automation.turn_on_heating
     from:
     to:
-    - 'on'
+    - 'off'
   conditions:
   - condition: state
     entity_id: sensor.home_tado_mode
@@ -2812,11 +2799,6 @@
       - 4a6f503b4be610604220524a46e7d7ec
       - 50ee635cf76608c93707ae50efcac2ab
       - 8ce4e662452aa6f044040e7f79e8a0d6
-  - action: input_boolean.turn_off
-    metadata: {}
-    target:
-      entity_id: input_boolean.turn_on_heating
-    data: {}
   mode: single
 - id: '1743867546748'
   alias: 'Heating: Run Hot Water 1HR'
@@ -4140,16 +4122,276 @@
   mode: parallel
   max: 10
 - id: '1769937483245'
-  alias: Voice assistant volume ducking
+  alias: Voice assistant volume ducking Kitchen
   description: ''
   use_blueprint:
     path: luka6000/HA_Voice_room_MP_volume.yaml
     input:
       assist: assist_satellite.home_assistant_voice_0963ba_assist_satellite
+      ducking_factor: 5
 - id: '1769937537435'
-  alias: Voice assistant volume ducking bedroom
+  alias: Voice assistant volume ducking Bedroom
   description: ''
   use_blueprint:
     path: luka6000/HA_Voice_room_MP_volume.yaml
     input:
       assist: assist_satellite.home_assistant_voice_093880_assist_satellite
+      ducking_factor: 5
+- id: '1770019913750'
+  alias: Voice assistant volume ducking Living Room
+  description: ''
+  use_blueprint:
+    path: luka6000/HA_Voice_room_MP_volume.yaml
+    input:
+      assist: assist_satellite.home_assistant_voice_092782_assist_satellite
+      ducking_factor: 5
+- id: '1770019952032'
+  alias: Voice assistant volume ducking Office
+  description: ''
+  use_blueprint:
+    path: luka6000/HA_Voice_room_MP_volume.yaml
+    input:
+      assist: assist_satellite.home_assistant_voice_0953e5_assist_satellite
+      ducking_factor: 5
+- id: '1771592198790'
+  alias: Vehicle MOT & Tax Due Warning (Joint, Multi-vehicle, Overdue + TTS + Ducking)
+  triggers:
+  - at: 08:00:00
+    trigger: time
+  actions:
+  - repeat:
+      for_each: '{{ vehicles }}'
+      sequence:
+      - variables:
+          label: '{{ repeat.item.label }}'
+          mot_entity: '{{ repeat.item.mot_entity }}'
+          tax_entity: '{{ repeat.item.tax_entity }}'
+          mot_flag: '{{ repeat.item.mot_flag }}'
+          tax_flag: '{{ repeat.item.tax_flag }}'
+          mot_state: '{{ states(mot_entity) }}'
+          tax_state: '{{ states(tax_entity) }}'
+          mot_days: "{% set raw = mot_state %} {% if raw in ['unknown','unavailable','none','',
+            None] %}\n  999\n{% else %}\n  {# If exactly YYYY-MM-DD, parse via strptime;
+            else as_datetime #}\n  {% if (raw | string | length == 10) and ('-' in
+            raw) %}\n    {% set dt = strptime(raw, '%Y-%m-%d') %}\n  {% else %}\n
+            \   {% set dt = as_datetime(raw, default=None) %}\n  {% endif %}\n  {%
+            if dt is none %}\n    999\n  {% else %}\n    {{ (dt.date() - now().date()).days
+            }}\n  {% endif %}\n{% endif %}\n"
+          tax_days: "{% set raw = tax_state %} {% if raw in ['unknown','unavailable','none','',
+            None] %}\n  999\n{% else %}\n  {% if (raw | string | length == 10) and
+            ('-' in raw) %}\n    {% set dt = strptime(raw, '%Y-%m-%d') %}\n  {% else
+            %}\n    {% set dt = as_datetime(raw, default=None) %}\n  {% endif %}\n
+            \ {% if dt is none %}\n    999\n  {% else %}\n    {{ (dt.date() - now().date()).days
+            }}\n  {% endif %}\n{% endif %}\n"
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ is_state(mot_flag, ''off'') }}'
+          - condition: template
+            value_template: '{{ mot_days <= 30 }}'
+          sequence:
+          - variables:
+              tts_message: "{% if mot_days < 0 %}\n  The MOT for {{ label }} is overdue
+                by {{ mot_days | abs }} days.\n{% elif mot_days == 0 %}\n  The MOT
+                for {{ label }} is due today.\n{% else %}\n  The MOT for {{ label
+                }} expires in {{ mot_days }} days.\n{% endif %}\n"
+          - data:
+              title: MOT Status — {{ label }}
+              message: '{{ tts_message }}'
+              data:
+                importance: high
+                channel: Home Assistant
+            action: notify.mobile_app_sm_s926b
+          - data:
+              title: MOT Status — {{ label }}
+              message: '{{ tts_message }}'
+              data:
+                push:
+                  interruption_level: time-sensitive
+            action: notify.mobile_app_hannahs_iphone_11
+          - choose:
+            - conditions:
+              - condition: state
+                entity_id: group.household
+                state: home
+              sequence:
+              - variables:
+                  saved_volume: '{{ state_attr(''media_player.kitchen_sonos_sonos'',
+                    ''volume_level'') | float(0.4) }}'
+              - target:
+                  entity_id: media_player.kitchen_sonos_sonos
+                data:
+                  volume_level: 0.25
+                action: media_player.volume_set
+              - target:
+                  entity_id: media_player.kitchen_sonos_sonos
+                data:
+                  media:
+                    media_content_id: /media/notifications/sonos_style_chime.mp3
+                    media_content_type: music
+                    metadata: {}
+                action: media_player.play_media
+              - delay: 00:00:02
+              - target:
+                  entity_id: media_player.kitchen_sonos_sonos
+                data:
+                  message: '{{ tts_message }}'
+                action: tts.google_translate_say
+              - delay: 00:00:05
+              - target:
+                  entity_id: media_player.kitchen_sonos_sonos
+                data:
+                  volume_level: '{{ saved_volume }}'
+                action: media_player.volume_set
+          - target:
+              entity_id: '{{ mot_flag }}'
+            action: input_boolean.turn_on
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ is_state(tax_flag, ''off'') }}'
+          - condition: template
+            value_template: '{{ tax_days <= 30 }}'
+          sequence:
+          - variables:
+              tts_message: "{% if tax_days < 0 %}\n  The vehicle tax for {{ label
+                }} is overdue by {{ tax_days | abs }} days.\n{% elif tax_days == 0
+                %}\n  The vehicle tax for {{ label }} is due today.\n{% else %}\n
+                \ The vehicle tax for {{ label }} is due in {{ tax_days }} days.\n{%
+                endif %}\n"
+          - data:
+              title: Vehicle Tax Status — {{ label }}
+              message: '{{ tts_message }}'
+              data:
+                importance: high
+                channel: Home Assistant
+            action: notify.mobile_app_sm_s926b
+          - data:
+              title: Vehicle Tax Status — {{ label }}
+              message: '{{ tts_message }}'
+              data:
+                push:
+                  interruption_level: time-sensitive
+            action: notify.mobile_app_hannahs_iphone_11
+          - choose:
+            - conditions:
+              - condition: state
+                entity_id: group.household
+                state: home
+              sequence:
+              - variables:
+                  saved_volume: '{{ state_attr(''media_player.kitchen_sonos_sonos'',
+                    ''volume_level'') | float(0.4) }}'
+              - target:
+                  entity_id: media_player.kitchen_sonos_sonos
+                data:
+                  volume_level: 0.25
+                action: media_player.volume_set
+              - target:
+                  entity_id: media_player.kitchen_sonos_sonos
+                data:
+                  media:
+                    media_content_id: /media/notifications/sonos_style_chime.mp3
+                    media_content_type: music
+                    metadata: {}
+                action: media_player.play_media
+              - delay: 00:00:02
+              - target:
+                  entity_id: media_player.kitchen_sonos_sonos
+                data:
+                  message: '{{ tts_message }}'
+                action: tts.google_translate_say
+              - delay: 00:00:05
+              - target:
+                  entity_id: media_player.kitchen_sonos_sonos
+                data:
+                  volume_level: '{{ saved_volume }}'
+                action: media_player.volume_set
+          - target:
+              entity_id: '{{ tax_flag }}'
+            action: input_boolean.turn_on
+  mode: single
+  variables:
+    vehicles:
+    - label: AF65 VCZ
+      mot_entity: sensor.dvla_af65vcz_motexpirydate
+      tax_entity: sensor.dvla_af65vcz_taxduedate
+      mot_flag: input_boolean.af65vcz_mot_alert_sent
+      tax_flag: input_boolean.af65vcz_tax_alert_sent
+    - label: X1 ADE
+      mot_entity: sensor.dvla_x1ade_motexpirydate
+      tax_entity: sensor.dvla_x1ade_taxduedate
+      mot_flag: input_boolean.x1ade_mot_alert_sent
+      tax_flag: input_boolean.x1ade_tax_alert_sent
+- id: '1771592537998'
+  alias: Vehicle MOT & Tax Alert Flags Reset (Multi-vehicle, Safe Dates)
+  triggers:
+  - at: 03:10:00
+    trigger: time
+  actions:
+  - repeat:
+      for_each: '{{ vehicles }}'
+      sequence:
+      - variables:
+          mot_entity: '{{ repeat.item.mot_entity }}'
+          tax_entity: '{{ repeat.item.tax_entity }}'
+          mot_flag: '{{ repeat.item.mot_flag }}'
+          tax_flag: '{{ repeat.item.tax_flag }}'
+          mot_state: '{{ states(mot_entity) }}'
+          tax_state: '{{ states(tax_entity) }}'
+          mot_days: "{% set raw = mot_state %} {% if raw in ['unknown','unavailable','none','',
+            None] %}\n  999\n{% else %}\n  {% if (raw | string | length == 10) and
+            ('-' in raw) %}\n    {% set dt = strptime(raw, '%Y-%m-%d') %}\n  {% else
+            %}\n    {% set dt = as_datetime(raw, default=None) %}\n  {% endif %}\n
+            \ {% if dt is none %}\n    999\n  {% else %}\n    {{ (dt.date() - now().date()).days
+            }}\n  {% endif %}\n{% endif %}\n"
+          tax_days: "{% set raw = tax_state %} {% if raw in ['unknown','unavailable','none','',
+            None] %}\n  999\n{% else %}\n  {% if (raw | string | length == 10) and
+            ('-' in raw) %}\n    {% set dt = strptime(raw, '%Y-%m-%d') %}\n  {% else
+            %}\n    {% set dt = as_datetime(raw, default=None) %}\n  {% endif %}\n
+            \ {% if dt is none %}\n    999\n  {% else %}\n    {{ (dt.date() - now().date()).days
+            }}\n  {% endif %}\n{% endif %}\n"
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ is_state(mot_flag, ''on'') }}'
+          - condition: template
+            value_template: '{{ mot_days > 30 }}'
+          sequence:
+          - target:
+              entity_id: '{{ mot_flag }}'
+            action: input_boolean.turn_off
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ is_state(tax_flag, ''on'') }}'
+          - condition: template
+            value_template: '{{ tax_days > 30 }}'
+          sequence:
+          - target:
+              entity_id: '{{ tax_flag }}'
+            action: input_boolean.turn_off
+  mode: single
+  variables:
+    vehicles:
+    - label: AF65 VCZ
+      mot_entity: sensor.dvla_af65vcz_motexpirydate
+      tax_entity: sensor.dvla_af65vcz_taxduedate
+      mot_flag: input_boolean.af65vcz_mot_alert_sent
+      tax_flag: input_boolean.af65vcz_tax_alert_sent
+    - label: X1 ADE
+      mot_entity: sensor.dvla_x1ade_motexpirydate
+      tax_entity: sensor.dvla_x1ade_taxduedate
+      mot_flag: input_boolean.x1ade_mot_alert_sent
+      tax_flag: input_boolean.x1ade_tax_alert_sent
+- id: '1771690436037'
+  alias: "Voice - Mute on Command \U0001F507"
+  description: ''
+  use_blueprint:
+    path: HowlingCoder/mute-on-command.yaml
+    input:
+      satellites:
+      - assist_satellite.home_assistant_voice_093880_assist_satellite
+      - assist_satellite.home_assistant_voice_0963ba_assist_satellite
+      - assist_satellite.home_assistant_voice_092782_assist_satellite
+      - assist_satellite.home_assistant_voice_0953e5_assist_satellite
