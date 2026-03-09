@@ -84,6 +84,10 @@ input_boolean:
     icon: mdi:lightbulb-group-outline
 
 notify:
+  - platform: group
+    name: adrian_mobile
+    services:
+      - action: mobile_app_adrian_s26
   - name: email_alert
     platform: smtp
     server: x1ade-co-uk.mail.protection.outlook.com

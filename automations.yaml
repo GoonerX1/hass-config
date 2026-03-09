@@ -91,15 +91,15 @@
       minutes: 1
       seconds: 0
     trigger: device
-  - type: turned_off
-    device_id: 072ff3730b8f3dc637a8eee93e351341
-    entity_id: binary_sensor.stairway_trisensor_motion
+  - type: no_motion
+    device_id: ed21789e6ec60c517afbbf19b40d3cf4
+    entity_id: 1f2d43a160cc67dd650a6e05e91defb0
     domain: binary_sensor
+    trigger: device
     for:
       hours: 0
       minutes: 1
       seconds: 0
-    trigger: device
   conditions:
   - condition: device
     type: is_on
@@ -248,15 +248,15 @@
       minutes: 2
       seconds: 0
     trigger: device
-  - type: turned_off
-    device_id: 072ff3730b8f3dc637a8eee93e351341
-    entity_id: binary_sensor.stairway_trisensor_motion
+  - type: no_motion
+    device_id: ed21789e6ec60c517afbbf19b40d3cf4
+    entity_id: 1f2d43a160cc67dd650a6e05e91defb0
     domain: binary_sensor
+    trigger: device
     for:
       hours: 0
       minutes: 2
       seconds: 0
-    trigger: device
   conditions:
   - condition: device
     type: is_on
@@ -485,9 +485,11 @@
   alias: Turn on 2nd landing lights with motion
   description: ''
   triggers:
-  - to: 'on'
-    entity_id: binary_sensor.2nd_landing_trisensor_motion
-    trigger: state
+  - type: turned_on
+    device_id: cf24ce4abf08a84e307f5eb2f1547fd5
+    entity_id: 6d4a8e804af0f668911b93dd533b45e8
+    domain: binary_sensor
+    trigger: device
   conditions:
   - condition: device
     type: is_off
@@ -507,15 +509,6 @@
   alias: Turn off 2nd landing light PM
   description: ''
   triggers:
-  - type: turned_off
-    device_id: e5a6aeb09ff3c7592d55d3efc57942a0
-    entity_id: binary_sensor.2nd_landing_trisensor_motion
-    domain: binary_sensor
-    for:
-      hours: 0
-      minutes: 2
-      seconds: 0
-    trigger: device
   - type: no_motion
     device_id: 44b9804a7704420885c30c6da5f0bb98
     entity_id: binary_sensor.samjin_motion_abad0801_ias_zone
@@ -525,6 +518,15 @@
       minutes: 2
       seconds: 0
     trigger: device
+  - type: turned_off
+    device_id: cf24ce4abf08a84e307f5eb2f1547fd5
+    entity_id: 6d4a8e804af0f668911b93dd533b45e8
+    domain: binary_sensor
+    trigger: device
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
   conditions:
   - condition: and
     conditions:
@@ -545,8 +547,10 @@
   alias: Turn on hallway light on with Stairway motion
   description: ''
   triggers:
-  - to: 'on'
-    entity_id: binary_sensor.stairway_trisensor_motion
+  - to:
+    - 'on'
+    entity_id:
+    - binary_sensor.stairway_trisensor_motion_detection
     trigger: state
   conditions:
   - condition: and
@@ -571,11 +575,13 @@
   alias: Turn on 1st landing light 1st stairway motion
   description: ''
   triggers:
-  - to: 'on'
+  - to:
+    - 'on'
     entity_id:
-    - binary_sensor.stairway_trisensor_motion
+    - binary_sensor.stairway_trisensor_motion_detection
     trigger: state
-    from: 'off'
+    from:
+    - 'off'
   conditions:
   - condition: and
     conditions:
@@ -1032,15 +1038,6 @@
   alias: Turn off 2nd landing light AM
   description: ''
   triggers:
-  - type: turned_off
-    device_id: e5a6aeb09ff3c7592d55d3efc57942a0
-    entity_id: binary_sensor.2nd_landing_trisensor_motion
-    domain: binary_sensor
-    for:
-      hours: 0
-      minutes: 2
-      seconds: 0
-    trigger: device
   - type: no_motion
     device_id: 44b9804a7704420885c30c6da5f0bb98
     entity_id: binary_sensor.samjin_motion_abad0801_ias_zone
@@ -1050,6 +1047,15 @@
       minutes: 2
       seconds: 0
     trigger: device
+  - type: turned_off
+    device_id: cf24ce4abf08a84e307f5eb2f1547fd5
+    entity_id: 6d4a8e804af0f668911b93dd533b45e8
+    domain: binary_sensor
+    trigger: device
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
   conditions:
   - condition: and
     conditions:
@@ -4395,3 +4401,88 @@
       - assist_satellite.home_assistant_voice_0963ba_assist_satellite
       - assist_satellite.home_assistant_voice_092782_assist_satellite
       - assist_satellite.home_assistant_voice_0953e5_assist_satellite
+- id: '1771838802809'
+  alias: Camera Snapshots with Year-Month Folders
+  description: ''
+  triggers:
+  - minutes: /15
+    trigger: time_pattern
+    enabled: false
+  - trigger: time
+    at: 08:00:00
+    weekday:
+    - sat
+  actions:
+  - variables:
+      year: '{{ now().year }}'
+      month: '{{ ''%02d'' % now().month }}'
+      timestamp: '{{ now().strftime(''%Y-%m-%d_%H-%M-%S'') }}'
+      base_path: /config/www/snapshots
+  - data:
+      year: '{{ year }}'
+      month: '{{ month }}'
+    action: shell_command.create_snapshot_dirs
+  - data:
+      entity_id: camera.blink_front_door
+      filename: '{{ base_path }}/{{ year }}/{{ month }}/front_door_{{ timestamp }}.jpg'
+    action: camera.snapshot
+  - data:
+      entity_id: camera.blink_back_gate
+      filename: '{{ base_path }}/{{ year }}/{{ month }}/back_gate_{{ timestamp }}.jpg'
+    action: camera.snapshot
+  mode: single
+- id: '1772390818584'
+  alias: Add multiple items to shopping list
+  description: ''
+  triggers:
+  - trigger: conversation
+    command:
+    - '[please] add {items_list} to [my | our | the] shopping list'
+  conditions: []
+  actions:
+  - variables:
+      spoken_text: '{{ trigger.slots.items_list }}'
+      items_list: '{% set cleaned = spoken_text.replace('','', '' and'') %}   {% set
+        list = cleaned.split('' and '') %} {{ list | map(''trim'') | list }}
+
+        '
+  - repeat:
+      for_each: '{{ items_list }}'
+      sequence:
+      - action: shopping_list.add_item
+        metadata: {}
+        data:
+          name: '{{ repeat.item }}'
+  mode: single
+- id: '1772463306560'
+  alias: Add multiple items to shopping list
+  triggers:
+  - trigger: conversation
+    command:
+    - '[please] add {items_list} to [my | our | the] shopping list'
+  actions:
+  - variables:
+      spoken_text: '{{ trigger.slots.items_list }}'
+      items_list: '{% set cleaned = spoken_text.replace('','', '' and'') %} {% set
+        list = cleaned.split('' and '') %} {{ list | map(''trim'') | list }}
+
+        '
+      normalise: "{% macro norm(x) %}\n  {{ x | string | lower | trim | regex_replace('[^a-z0-9
+        ]', '') }}\n{% endmacro %} norm\n"
+      existing: "{%- set items = state_attr('shopping_list.shopping_list', 'items')
+        or [] -%} {%- set names = items | map(attribute='name') | list -%} [ {%- for
+        n in names -%}\n  \"{{ normalise(n) }}\"\n  {%- if not loop.last %}, {% endif
+        -%}\n{%- endfor -%} ]\n"
+  - repeat:
+      for_each: '{{ items_list }}'
+      sequence:
+      - variables:
+          new_norm: '{{ normalise(repeat.item) }}'
+      - if:
+        - condition: template
+          value_template: '{{ new_norm not in existing }}'
+        then:
+        - data:
+            name: '{{ repeat.item }}'
+          action: shopping_list.add_item
+  mode: single
