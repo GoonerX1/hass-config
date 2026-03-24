@@ -22,6 +22,11 @@ homeassistant:
   packages: !include_dir_named packages
   #template: !include_dir_merge_list templates/
 
+lovelace:
+  resources:
+    - url: /hacsfiles/mushroom-strategy/mushroom-strategy.js
+      type: module
+
 group: !include groups.yaml
 automation ui: !include automations.yaml
 automation manual: !include_dir_merge_list automation/
