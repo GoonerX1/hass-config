@@ -1551,7 +1551,6 @@
     - media_player.living_room_tv
     - media_player.sony_bravia_tv_2
     - media_player.sony_xr_55a84j
-    - media_player.sony_xr_55a84j_3
     from:
     - playing
     for:
@@ -1857,9 +1856,6 @@
       domain: media_player
       entity_id: ec9e1dd98e9a247876bac54e23061d4c
       type: is_on
-    - condition: state
-      entity_id: media_player.sony_xr_55a84j_3
-      state: paused
     - condition: state
       entity_id: media_player.living_room_tv
       state:
@@ -2729,9 +2725,10 @@
     entity_id: input_boolean.turn_on_heating
     state:
     - 'off'
+    enabled: false
   - condition: numeric_state
     entity_id: sensor.home_nearest_distance
-    below: 2000
+    below: 6000
   - condition: and
     conditions:
     - condition: time
