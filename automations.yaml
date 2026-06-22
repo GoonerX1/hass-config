@@ -392,13 +392,15 @@
   description: ''
   triggers:
   - entity_id:
-    - media_player.sony_bravia_tv_2
+    - media_player.living_room_tv_4
     for:
       hours: 0
       minutes: 5
       seconds: 0
-    from: standby
-    to: 'off'
+    from:
+    - standby
+    to:
+    - 'off'
     trigger: state
   conditions:
   - condition: or
@@ -421,12 +423,13 @@
   description: ''
   triggers:
   - entity_id:
-    - media_player.sony_bravia_tv_2
+    - media_player.living_room_tv_4
     for:
       hours: 0
       minutes: 2
       seconds: 0
-    to: 'off'
+    to:
+    - 'off'
     trigger: state
   conditions:
   - after: '21:00:00'
@@ -655,10 +658,11 @@
     entity_id:
     - input_boolean.its_dark
     from:
-    to: 'on'
+    to:
+    - 'on'
     for:
       hours: 0
-      minutes: 10
+      minutes: 6
       seconds: 0
   conditions:
   - condition: time
@@ -667,11 +671,9 @@
   - data: {}
     action: cover.close_cover
     target:
-      entity_id:
-      - cover.rfy_010101_1
-      - cover.dining_venetian
-      - cover.rfy_010102_2
-      - cover.rfy_010103_1
+      floor_id:
+      - 1st_floor
+      - ground
   mode: single
 - id: '1591810014680'
   alias: 'Blinds: Open AM Weekdays'
@@ -806,8 +808,10 @@
     state: home
     entity_id: group.household
   actions:
-  - entity_id: cover.rfy_010103_1
-    action: cover.open_cover
+  - action: cover.open_cover
+    data: {}
+    target:
+      area_id: 6aaf5c95bc6d43e384e05551ea13ccac
   mode: single
 - id: '1600620477487'
   alias: 'Night Mode: On'
@@ -986,12 +990,15 @@
     entity_id: group.household
     state: home
   actions:
-  - entity_id: cover.rfy_010103_1
-    action: cover.open_cover
+  - action: cover.open_cover
+    data: {}
+    target:
+      area_id: 6aaf5c95bc6d43e384e05551ea13ccac
   - delay: 00:00:10
   - data: {}
-    entity_id: cover.rfy_010103_1
     action: cover.stop_cover
+    target:
+      area_id: 6aaf5c95bc6d43e384e05551ea13ccac
   mode: single
 - id: '1612944322118'
   alias: 'Blinds: Open AM Weekends'
@@ -1222,17 +1229,7 @@
       entity_id: binary_sensor.workday_sensor
       state: 'on'
   - condition: or
-    conditions:
-    - condition: device
-      device_id: 53f2d7ae84dda9029b302ab4964858ac
-      domain: device_tracker
-      entity_id: f7222ab44d473bfb267965b45cddbe5d
-      type: is_home
-    - condition: device
-      device_id: bf5d562e3b70ae562646c93911e7f6c5
-      domain: device_tracker
-      entity_id: 9a1627d4c76b21b2c1644bec64753f16
-      type: is_home
+    conditions: []
   actions:
   - action: light.turn_on
     target:
@@ -1431,13 +1428,50 @@
     domain: binary_sensor
     trigger: device
     id: package
-  conditions: []
+  - trigger: event.received
+    target:
+      entity_id: event.g6_entry_doorbell
+    options:
+      event_type:
+      - ring
+    id: doorbell
+  - trigger: state
+    entity_id:
+    - event.g6_entry_doorbell
+    attribute: event_type
+    to:
+    - ring
+    id: doorbell
+    enabled: false
+  - trigger: state
+    entity_id:
+    - event.g6_entry_doorbell
+    id: doorbell_template
+    enabled: false
+  conditions:
+  - condition: and
+    conditions:
+    - condition: trigger
+      id:
+      - doorbell_template
+    - condition: template
+      value_template: "      {{\n        trigger.event.data.old_state is not none
+        and\n        not trigger.event.data.old_state.state == 'unavailable' and\n
+        \       trigger.event.data.new_state is not none and\n        not trigger.event.data.new_state.state
+        == 'unavailable' and\n        trigger.event.data.new_state.attributes.event_type
+        == 'ring'\n      }}"
+    enabled: false
   actions:
   - choose:
     - conditions:
-      - condition: trigger
-        id:
-        - doorbell
+      - condition: or
+        conditions:
+        - condition: trigger
+          id:
+          - doorbell_template
+        - condition: trigger
+          id:
+          - doorbell
       sequence:
       - parallel:
         - data:
@@ -1549,7 +1583,7 @@
   triggers:
   - entity_id:
     - media_player.living_room_tv
-    - media_player.sony_bravia_tv_2
+    - media_player.living_room_tv_4
     - media_player.sony_xr_55a84j
     from:
     - playing
@@ -1712,11 +1746,12 @@
   alias: Notify Adrian when away
   description: ''
   triggers:
-  - type: occupied
-    device_id: 7847d0fd5a1d895eb376ffc24a921e31
-    entity_id: binary_sensor.2rm_doorbell_g4_doorbell
-    domain: binary_sensor
-    trigger: device
+  - trigger: event.received
+    target:
+      entity_id: event.g6_entry_doorbell
+    options:
+      event_type:
+      - ring
   conditions:
   - condition: state
     entity_id: person.adrian_chapman
@@ -1818,11 +1853,12 @@
   - trigger: state
     entity_id:
     - input_boolean.its_dark
-    to: 'on'
+    to:
+    - 'on'
     from:
     for:
       hours: 0
-      minutes: 10
+      minutes: 5
       seconds: 0
   conditions:
   - condition: or
@@ -1833,8 +1869,12 @@
       entity_id: media_player.sony_xr_55a84j
       type: is_on
     - condition: state
-      entity_id: media_player.sony_bravia_tv_2
-      state: playing
+      entity_id: media_player.living_room_tv_4
+      state:
+      - playing
+      - 'on'
+      - paused
+      - idle
     - condition: state
       entity_id: media_player.sonos_one
       state: playing
@@ -1843,11 +1883,6 @@
       domain: media_player
       entity_id: media_player.sony_xr_55a84j
       type: is_playing
-    - condition: device
-      type: is_on
-      device_id: b8de72e89c262f7f30ea46575150e738
-      entity_id: 4429c0e419ebc11660f3cc78cbf97f80
-      domain: remote
     - condition: state
       entity_id: switch.ps5_993_power
       state: 'on'
@@ -1864,6 +1899,17 @@
       entity_id: media_player.playstation_5
       state:
       - playing
+    - condition: state
+      entity_id: media_player.plex_plex_for_android_tv_bravia_4k_vh2
+      state:
+      - 'on'
+      - idle
+      - playing
+      - paused
+    - condition: state
+      entity_id: remote.living_room_tv_2
+      state:
+      - 'on'
   actions:
   - target:
       entity_id:
@@ -2037,11 +2083,6 @@
   - condition: or
     conditions:
     - condition: device
-      device_id: b8de72e89c262f7f30ea46575150e738
-      domain: media_player
-      entity_id: b6085cf80c56bb06f8c1d7e03a8fdd8b
-      type: is_on
-    - condition: device
       type: is_on
       device_id: 19694d37edd138b447f7fb218c80174e
       entity_id: 557def1149d66da651e551402318a885
@@ -2064,6 +2105,11 @@
       domain: media_player
       entity_id: d99ccc696d19e84a7ac07afb7beff0cb
       type: is_on
+    - condition: media_player.is_on
+      target:
+        device_id: 26b971f83e4e1b9ae5b8cd7e7886b3ff
+      options:
+        behavior: any
   actions:
   - target:
       entity_id: media_player.sony_xr_55a84j
@@ -2667,6 +2713,18 @@
     from:
     to: unknown
     id: AIPort
+  - trigger: state
+    entity_id:
+    - binary_sensor.g6_entry_doorbell
+    from:
+    to:
+    - unavailable
+    - unknown
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    id: Doorbell
   conditions: []
   actions:
   - choose:
@@ -2690,6 +2748,16 @@
         data: {}
         target:
           entity_id: button.usw_24_poe_port_15_power_cycle
+    - conditions:
+      - condition: trigger
+        id:
+        - Doorbell
+      sequence:
+      - action: button.press
+        metadata: {}
+        target:
+          entity_id: button.usw_24_poe_port_7_power_cycle
+        data: {}
   mode: single
 - id: '1743601159106'
   alias: 'Heating: Turn on'
@@ -2708,7 +2776,7 @@
     - sensor.garden_temperature
     for:
       hours: 0
-      minutes: 30
+      minutes: 10
       seconds: 0
     below: 13
     id: Temperature
@@ -2806,7 +2874,7 @@
     enabled: false
   - trigger: state
     entity_id:
-    - automation.turn_on_heating
+    - input_boolean.turn_on_heating
     from:
     to:
     - 'off'

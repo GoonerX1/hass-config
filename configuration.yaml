@@ -93,8 +93,8 @@ notify:
     name: adrian_mobile
     services:
       - action: mobile_app_adrian_s26
-  - name: email_alert
-    platform: smtp
+  - platform: smtp
+    name: email_alert
     server: x1ade-co-uk.mail.protection.outlook.com
     port: 25
     encryption: starttls
@@ -102,8 +102,8 @@ notify:
     sender: hassio@x1ade.co.uk
     recipient: adrian@x1ade.co.uk
     sender_name: HassIO
-  - name: email_cv28
-    platform: smtp
+  - platform: smtp
+    name: email_cv28
     server: x1ade-co-uk.mail.protection.outlook.com
     port: 25
     encryption: starttls
@@ -111,8 +111,8 @@ notify:
     sender: hassio@x1ade.co.uk
     recipient: adrianchapman.cv28@gtmailplus.com
     sender_name: HassIO
-  - name: WhatsApp
-    platform: rest
+  - platform: rest
+    name: WhatsApp
     resource: https://api.callmebot.com/whatsapp.php
     data:
       source: HA
