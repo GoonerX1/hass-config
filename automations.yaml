@@ -397,12 +397,17 @@
     entity_id: sensor.hassio_x1ade_co_uk_cert_expiry
     below: '10'
   actions:
-  - data:
+  - action: ms365_mail.mail_send
+    target:
+      entity_id: sensor.x1ade_mail_mail
+    data:
+      subject: Hassio certificate expiry
       message: The certificate {{state_attr('sensor.hassio_x1ade_co_uk_cert_expiry',
         'friendly_name')}} expires in {{states('sensor.hassio_x1ade_co_uk_cert_expiry')}}
         days
-      title: Hassio certificate expiry
-    action: notify.email_alert
+      to: adrian@x1ade.co.uk
+      from: adrian@x1ade.co.uk
+      message_is_html: true
   mode: single
 - id: '1581886653226'
   alias: Turn off lights PM
@@ -1138,10 +1143,15 @@
     input:
       day: 0
       actions:
-      - data:
-          title: Low Battery Warning
+      - action: ms365_mail.mail_send
+        target:
+          entity_id: sensor.x1ade_mail_mail
+        data:
+          subject: Low Battery Warning
           message: 'Low battery warning for: {{sensors}}'
-        action: notify.email_alert
+          to: adrian@x1ade.co.uk
+          from: adrian@x1ade.co.uk
+          message_is_html: true
       - data:
           title: Low Battery Warning
           message: 'Low battery warning for: {{sensors}}'
@@ -3393,8 +3403,11 @@
 
       '
   actions:
-  - data:
-      title: Arsenal - Match Reminder
+  - action: ms365_mail.mail_send
+    target:
+      entity_id: sensor.x1ade_mail_mail
+    data:
+      subject: Arsenal - Match Reminder
       message: 'The match between {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
         ''matches'')[0].home_team }} v {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
         ''matches'')[0].away_team }} will start in 15 minutes!
@@ -3405,7 +3418,9 @@
           }}
 
           '
-    action: notify.email_cv28
+      to: adrian@x1ade.co.uk
+      from: adrian@x1ade.co.uk
+      message_is_html: true
   - data:
       title: Arsenal - Match Reminder
       message: 'The match between {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
@@ -3421,459 +3436,55 @@
     action: notify.adrian_mobile
   mode: single
 - id: '1764259012130'
-  alias: CalcioLive - Arsenal Goal Notification with Minutes and Player
-  description: Sends a notification for every goal scored, including penalties.
+  alias: Arsenal Goal Notification (Clean)
   triggers:
-  - value_template: "{% for event in state_attr('sensor.calciolive_next_eng_1_arsenal',
-      'matches')[0].match_details %}\n  {% if 'Goal' in event or 'Penalty' in event
-      %}\n    true\n  {% endif %}\n{% endfor %}\n"
-    trigger: template
-    id: epl
-  - value_template: "{% for event in state_attr('sensor.calciolive_next_uefa_champions_arsenal',
-      'matches')[0].match_details %}\n  {% if 'Goal' in event or 'Penalty' in event
-      %}\n    true\n  {% endif %}\n{% endfor %}\n"
-    trigger: template
-    id: cl
-  - value_template: "{% for event in state_attr('sensor.calciolive_next_eng_league_cup_arsenal',
-      'matches')[0].match_details %}\n  {% if 'Goal' in event or 'Penalty' in event
-      %}\n    true\n  {% endif %}\n{% endfor %}\n"
-    trigger: template
-    id: lc
-  - value_template: "{% for event in state_attr('sensor.calciolive_next_eng_fa_arsenal',
-      'matches')[0].match_details %}\n  {% if 'Goal' in event or 'Penalty' in event
-      %}\n    true\n  {% endif %}\n{% endfor %}\n"
-    trigger: template
-    id: fac
-  conditions: []
+  - entity_id:
+    - sensor.calciolive_next_eng_1_arsenal
+    - sensor.calciolive_next_uefa_champions_arsenal
+    - sensor.calciolive_next_eng_league_cup_arsenal
+    - sensor.calciolive_next_eng_fa_arsenal
+    trigger: state
   actions:
-  - variables:
-      epl_match_details: '{{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-        ''matches'')[0].match_details }}'
-      cl_match_details: '{{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-        ''matches'')[0].match_details }}'
-      fac_match_details: '{{ state_attr(''sensor.calciolive_next_eng_fa_arsenal'',
-        ''matches'')[0].match_details }}'
-      lc_match_details: '{{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-        ''matches'')[0].match_details }}'
-    enabled: false
   - repeat:
-      for_each: '{{ match_details }}'
+      for_each: '{{ new_goals }}'
       sequence:
       - variables:
           event: '{{ repeat.item }}'
-      - choose:
-        - conditions:
-          - condition: template
-            value_template: '{{ ''Goal'' in event or ''Penalty'' in event }}
+          minute: '{{ event.split("''")[0].split(''-'')[-1].strip() }}'
+          player: '{{ event.split("'': ")[1].strip() }}'
+          type: '{{ ''Penalty scored by'' if ''Penalty'' in event else ''Goal scored
+            by'' }}'
+          home: '{{ match.home_team }}'
+          away: '{{ match.away_team }}'
+      - data:
+          title: Match {{ home }} vs {{ away }}
+          message: ⚽ {{ type }} {{ player }} at minute {{ minute }}!
+        action: notify.adrian_mobile
+      - data:
+          target: sensor.x1ade_mail_mail
+          to: adrian@x1ade.co.uk
+          from: adrian@x1ade.co.uk
+          message_is_html: true
+          subject: Match {{ home }} vs {{ away }}
+          body: '"⚽ {{ type }} {{ player }} at minute {{ minute }}!"
 
-              '
-          sequence:
-          - if:
-            - condition: trigger
-              id:
-              - epl
-            then:
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_cv28
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_alert
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.adrian_mobile
-          - if:
-            - condition: trigger
-              id:
-              - cl
-            then:
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_cv28
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_alert
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.adrian_mobile
-          - if:
-            - condition: trigger
-              id:
-              - lc
-            then:
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.adrian_mobile
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_cv28
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_alert
-          - if:
-            - condition: trigger
-              id:
-              - fac
-            then:
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_fa_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_fa_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.adrian_mobile
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_cv28
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_alert
-    enabled: false
-  - if:
-    - condition: trigger
-      id:
-      - epl
-    then:
-    - variables:
-        epl_match_details: '{{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-          ''matches'')[0].match_details }}'
-    - repeat:
-        for_each: '{{ epl_match_details }}'
-        sequence:
-        - variables:
-            event: '{{ repeat.item }}'
-        - choose:
-          - conditions:
-            - condition: template
-              value_template: '{{ ''Goal'' in event or ''Penalty'' in event }}'
-            sequence:
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_cv28
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_alert
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.adrian_mobile
-  - if:
-    - condition: trigger
-      id:
-      - cl
-    then:
-    - variables:
-        cl_match_details: '{{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-          ''matches'')[0].match_details }}'
-    - repeat:
-        for_each: '{{ cl_match_details }}'
-        sequence:
-        - variables:
-            event: '{{ repeat.item }}'
-        - choose:
-          - conditions:
-            - condition: template
-              value_template: '{{ ''Goal'' in event or ''Penalty'' in event }}'
-            sequence:
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_cv28
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_alert
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.adrian_mobile
-  - if:
-    - condition: trigger
-      id:
-      - lc
-    then:
-    - variables:
-        lc_match_details: '{{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-          ''matches'')[0].match_details }}'
-    - repeat:
-        for_each: '{{ lc_match_details }}'
-        sequence:
-        - variables:
-            event: '{{ repeat.item }}'
-        - choose:
-          - conditions:
-            - condition: template
-              value_template: '{{ ''Goal'' in event or ''Penalty'' in event }}'
-            sequence:
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_cv28
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_alert
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.adrian_mobile
-  - if:
-    - condition: trigger
-      id:
-      - fac
-    then:
-    - variables:
-        fac_match_details: '{{ state_attr(''sensor.calciolive_next_eng_fa_arsenal'',
-          ''matches'')[0].match_details }}'
-    - repeat:
-        for_each: '{{ fac_match_details }}'
-        sequence:
-        - variables:
-            event: '{{ repeat.item }}'
-        - choose:
-          - conditions:
-            - condition: template
-              value_template: '{{ ''Goal'' in event or ''Penalty'' in event }}'
-            sequence:
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_fa_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_fa_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_cv28
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_fa_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_fa_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.email_alert
-            - data_template:
-                title: 'Match {{ state_attr(''sensor.calciolive_next_eng_fa_arsenal'',
-                  ''matches'')[0].home_team }} vs {{ state_attr(''sensor.calciolive_next_eng_fa_arsenal'',
-                  ''matches'')[0].away_team }}
-
-                  '
-                message: '{% set tipo = ''Penalty scored by'' if ''Penalty'' in event
-                  else ''Goal scored by'' %} {% set minuto = event.split("''")[0].split("-")[-1].strip()
-                  %} {% set giocatore = event.split("'': ")[1].strip() %} ⚽ {{ tipo
-                  }} {{ giocatore }} at minute {{ minuto }}!
-
-                  '
-              action: notify.adrian_mobile
+            '
+        action: ms365_mail.mail_send
+        target:
+          entity_id: sensor.x1ade_mail_mail
   mode: queued
+  variables:
+    matches: '{{ state_attr(trigger.entity_id, ''matches'') }}'
+    match: '{{ matches[0] if matches else none }}'
+    new_events: '{{ match.match_details if match else [] }}'
+    old_events: "{{ trigger.from_state.attributes.matches[0].match_details\n   if
+      trigger.from_state and trigger.from_state.attributes.matches else [] }}\n"
+    goals: '{{ new_events | select(''search'',''Goal|Penalty'') | list }}
+
+      '
+    new_goals: '{{ goals | reject(''in'', old_events) | list }}
+
+      '
 - id: '1765368898448'
   alias: 'Notify: Bin Collections (Black Bin Tomorrow)'
   description: ''
@@ -3949,121 +3560,6 @@
     device_id: 7d5e61c0c8600126739996ac019c4728
     entity_id: 911f893142ce5afa37c0bfd9b82a3c97
     domain: switch
-  mode: single
-- id: '1768320968573'
-  alias: Arsenal FT League Cup
-  description: ''
-  triggers:
-  - value_template: '{% set matches = state_attr(''sensor.calciolive_next_eng_league_cup_arsenal'',
-      ''matches'') or [] %} {% if matches | length > 0 %} {% set s = (matches[0].status
-      or '''') | lower %} {{ s in [''full time'',''ft'',''finished''] }} {% else %}
-      {{ false }} {% endif %}'
-    trigger: template
-  actions:
-  - data:
-      title: 'Full Time: Arsenal - League Cup'
-      message: "{% set matches = state_attr('sensor.calciolive_next_eng_league_cup_arsenal',
-        'matches') or [] %} {% set m = matches[0] if matches | length > 0 else none
-        %} {% if m %}\n  {{ m.home_team }} {{ m.home_score | int }} - {{ m.away_score
-        | int }} {{ m.away_team }}\n{% else %}\n  No match data\n{% endif %}"
-    action: notify.adrian_mobile
-- id: '1768321558268'
-  alias: Arsenal FT EPL
-  description: ''
-  triggers:
-  - value_template: '{% set matches = state_attr(''sensor.calciolive_next_eng_1_arsenal'',
-      ''matches'') or [] %} {% if matches | length > 0 %} {% set s = (matches[0].status
-      or '''') | lower %} {{ s in [''full time'',''ft'',''finished''] }} {% else %}
-      {{ false }} {% endif %}'
-    trigger: template
-  conditions: []
-  actions:
-  - data:
-      title: 'Full Time: Arsenal - League Cup'
-      message: "{% set matches = state_attr('sensor.calciolive_next_eng_1_arsenal',
-        'matches') or [] %} {% set m = matches[0] if matches | length > 0 else none
-        %} {% if m %}\n  {{ m.home_team }} {{ m.home_score | int }} - {{ m.away_score
-        | int }} {{ m.away_team }}\n{% else %}\n  No match data\n{% endif %}"
-    action: notify.adrian_mobile
-  - action: notify.email_alert
-    data:
-      message: "{% set matches = state_attr('sensor.calciolive_next_eng_1_arsenal',
-        'matches') or [] %} {% set m = matches[0] if matches | length > 0 else none
-        %} {% if m %}\n  {{ m.home_team }} {{ m.home_score | int }} - {{ m.away_score
-        | int }} {{ m.away_team }}\n{% else %}\n  No match data\n{% endif %}"
-      title: Arsenal EPL Full Time Result
-  - action: notify.email_cv28
-    data:
-      message: "{% set matches = state_attr('sensor.calciolive_next_eng_1_arsenal',
-        'matches') or [] %} {% set m = matches[0] if matches | length > 0 else none
-        %} {% if m %}\n  {{ m.home_team }} {{ m.home_score | int }} - {{ m.away_score
-        | int }} {{ m.away_team }}\n{% else %}\n  No match data\n{% endif %}"
-  mode: single
-- id: '1768321720611'
-  alias: Arsenal FT FAC
-  description: ''
-  triggers:
-  - value_template: '{% set matches = state_attr(''sensor.calciolive_next_eng_fa_arsenal'',
-      ''matches'') or [] %} {% if matches | length > 0 %} {% set s = (matches[0].status
-      or '''') | lower %} {{ s in [''full time'',''ft'',''finished''] }} {% else %}
-      {{ false }} {% endif %}'
-    trigger: template
-  conditions: []
-  actions:
-  - data:
-      title: 'Full Time: Arsenal - League Cup'
-      message: "{% set matches = state_attr('sensor.calciolive_next_eng_fa_arsenal',
-        'matches') or [] %} {% set m = matches[0] if matches | length > 0 else none
-        %} {% if m %}\n  {{ m.home_team }} {{ m.home_score | int }} - {{ m.away_score
-        | int }} {{ m.away_team }}\n{% else %}\n  No match data\n{% endif %}"
-    action: notify.adrian_mobile
-  - action: notify.email_alert
-    data:
-      message: "{% set matches = state_attr('sensor.calciolive_next_eng_fa_arsenal',
-        'matches') or [] %} {% set m = matches[0] if matches | length > 0 else none
-        %} {% if m %}\n  {{ m.home_team }} {{ m.home_score | int }} - {{ m.away_score
-        | int }} {{ m.away_team }}\n{% else %}\n  No match data\n{% endif %}"
-      title: 'Full Time: Arsenal FA Cup'
-  - action: notify.email_cv28
-    data:
-      message: "{% set matches = state_attr('sensor.calciolive_next_eng_fa_arsenal',
-        'matches') or [] %} {% set m = matches[0] if matches | length > 0 else none
-        %} {% if m %}\n  {{ m.home_team }} {{ m.home_score | int }} - {{ m.away_score
-        | int }} {{ m.away_team }}\n{% else %}\n  No match data\n{% endif %}"
-      title: 'Full Time: Arsenal FA Cup'
-  mode: single
-- id: '1768321773285'
-  alias: Arsenal FT CL
-  description: ''
-  triggers:
-  - value_template: '{% set matches = state_attr(''sensor.calciolive_next_uefa_champions_arsenal'',
-      ''matches'') or [] %} {% if matches | length > 0 %} {% set s = (matches[0].status
-      or '''') | lower %} {{ s in [''full time'',''ft'',''finished''] }} {% else %}
-      {{ false }} {% endif %}'
-    trigger: template
-  conditions: []
-  actions:
-  - data:
-      title: 'Full Time: Arsenal - League Cup'
-      message: "{% set matches = state_attr('sensor.calciolive_next_uefa_champions_arsenal',
-        'matches') or [] %} {% set m = matches[0] if matches | length > 0 else none
-        %} {% if m %}\n  {{ m.home_team }} {{ m.home_score | int }} - {{ m.away_score
-        | int }} {{ m.away_team }}\n{% else %}\n  No match data\n{% endif %}"
-    action: notify.adrian_mobile
-  - action: notify.email_alert
-    data:
-      message: "{% set matches = state_attr('sensor.calciolive_next_uefa_champions_arsenal',
-        'matches') or [] %} {% set m = matches[0] if matches | length > 0 else none
-        %} {% if m %}\n  {{ m.home_team }} {{ m.home_score | int }} - {{ m.away_score
-        | int }} {{ m.away_team }}\n{% else %}\n  No match data\n{% endif %}"
-      title: Arsenal CL Full Time Result
-  - action: notify.email_cv28
-    data:
-      message: "{% set matches = state_attr('sensor.calciolive_next_uefa_champions_arsenal',
-        'matches') or [] %} {% set m = matches[0] if matches | length > 0 else none
-        %} {% if m %}\n  {{ m.home_team }} {{ m.home_score | int }} - {{ m.away_score
-        | int }} {{ m.away_team }}\n{% else %}\n  No match data\n{% endif %}"
-      title: Arsenal CL Full Time Result
   mode: single
 - id: tado_pause_heating_notify_action
   alias: Tado - Pause heating on window open (notify + action)
@@ -4604,3 +4100,116 @@
             name: '{{ repeat.item }}'
           action: shopping_list.add_item
   mode: single
+- id: '1782300190346'
+  alias: Arsenal Match Notifications (All-in-One)
+  description: ''
+  triggers:
+  - entity_id:
+    - sensor.calciolive_next_eng_1_arsenal
+    - sensor.calciolive_next_uefa_champions_arsenal
+    - sensor.calciolive_next_eng_league_cup_arsenal
+    - sensor.calciolive_next_eng_fa_arsenal
+    trigger: state
+  actions:
+  - repeat:
+      for_each: '{{ new_goals }}'
+      sequence:
+      - variables:
+          event: '{{ repeat.item }}'
+          minute: '{{ event.split("''")[0].split(''-'')[-1].strip() }}'
+          player: '{{ event.split("'': ")[1].strip() }}'
+          is_arsenal: '{{ ''Arsenal'' in event }}'
+          emoji: "{{ '\U0001F534⚽' if is_arsenal else '⚪⚽' }}"
+          text: "{% if is_arsenal %}\n  GOAL for Arsenal! {{ player }}\n{% else %}\n
+            \ Goal conceded \U0001F62C {{ player }}\n{% endif %}\n"
+      - data:
+          title: '{{ competition }}: {{ home }} vs {{ away }}'
+          message: '{{ emoji }} {{ text }} ({{ minute }}'') — {{ home }} {{ match.home_score
+            }}-{{ match.away_score }} {{ away }}'
+        action: notify.adrian_mobile
+      - data:
+          target: adrian@x1ade.co.uk
+          subject: '{{ competition }} Goal Update'
+          body: '{{ emoji }} {{ text }} at {{ minute }}'' — {{ home }} {{ match.home_score
+            }}-{{ match.away_score }} {{ away }}'
+          is_html: true
+        action: ms365_mail.mail_send
+        target:
+          entity_id: sensor.x1ade_mail_mail
+  - if:
+    - condition: template
+      value_template: '{{ status in [''live'',''1h''] and old_status not in [''live'',''1h'']
+        }}'
+    then:
+    - data:
+        title: '{{ competition }} Kickoff'
+        message: '{{ home }} vs {{ away }} has kicked off!'
+      action: notify.adrian_mobile
+    - data:
+        target: adrian@x1ade.co.uk
+        subject: '{{ competition }} Kickoff'
+        body: '{{ home }} vs {{ away }} has kicked off!'
+        is_html: true
+      action: ms365_mail.mail_send
+      target:
+        entity_id: sensor.x1ade_mail_mail
+  - if:
+    - condition: template
+      value_template: '{{ status in [''half time'',''ht''] and old_status not in [''half
+        time'',''ht''] }}'
+    then:
+    - data:
+        title: '{{ competition }} Half Time'
+        message: '{{ score }}'
+      action: notify.adrian_mobile
+    - data:
+        target: adrian@x1ade.co.uk
+        subject: '{{ competition }} Half Time'
+        body: '{{ score }}'
+        is_html: true
+      action: ms365_mail.mail_send
+      target:
+        entity_id: sensor.x1ade_mail_mail
+  - if:
+    - condition: template
+      value_template: '{{ status in [''full time'',''ft'',''finished''] and old_status
+        not in [''full time'',''ft'',''finished''] }}'
+    then:
+    - variables:
+        result: "{% if match.home_team == 'Arsenal' %}\n  {% set a = match.home_score
+          %}\n  {% set b = match.away_score %}\n{% else %}\n  {% set a = match.away_score
+          %}\n  {% set b = match.home_score %}\n{% endif %}\n{% if a > b %}\n  ✅ Arsenal
+          WIN\n{% elif a < b %}\n  ❌ Arsenal LOSS\n{% else %}\n  \U0001F91D DRAW\n{%
+          endif %}\n"
+    - data:
+        title: '{{ competition }} Full Time'
+        message: '{{ score }} — {{ result }}'
+      action: notify.adrian_mobile
+    - data:
+        target: adrian@x1ade.co.uk
+        subject: '{{ competition }} Full Time Result'
+        body: '{{ score }} — {{ result }}'
+        is_html: true
+      action: ms365_mail.mail_send
+      target:
+        entity_id: sensor.x1ade_mail_mail
+  mode: queued
+  variables:
+    match: "{{ trigger.to_state.attributes.matches[0]\n   if trigger.to_state.attributes.matches
+      else none }}\n"
+    old_match: "{{ trigger.from_state.attributes.matches[0]\n   if trigger.from_state
+      and trigger.from_state.attributes.matches else none }}\n"
+    new_events: '{{ match.match_details if match else [] }}'
+    old_events: '{{ old_match.match_details if old_match else [] }}'
+    goals: '{{ new_events | select(''search'', ''Goal|Penalty'') | list }}'
+    new_goals: '{{ goals | reject(''in'', old_events) | list }}'
+    competition: "{% if 'eng_1' in trigger.entity_id %}\n  EPL\n{% elif 'uefa' in
+      trigger.entity_id %}\n  Champions League\n{% elif 'league_cup' in trigger.entity_id
+      %}\n  League Cup\n{% elif 'fa' in trigger.entity_id %}\n  FA Cup\n{% else %}\n
+      \ Arsenal Match\n{% endif %}\n"
+    status: '{{ (match.status or '''') | lower }}'
+    old_status: '{{ (old_match.status or '''') | lower if old_match else '''' }}'
+    home: '{{ match.home_team if match else '''' }}'
+    away: '{{ match.away_team if match else '''' }}'
+    score: '{{ home }} {{ match.home_score }} - {{ match.away_score }} {{ away if
+      match else '''' }}'
