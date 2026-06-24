@@ -2,11 +2,12 @@
   alias: Turn on Hallway light with Motion
   description: ''
   triggers:
-  - to: 'on'
+  - trigger: state
     entity_id:
-    - binary_sensor.hallway_motion
-    trigger: state
+    - binary_sensor.hallway_hallway_trisensor_sensor_state_motion
     from:
+    to:
+    - 'on'
   - type: opened
     device_id: 032e6037fba540ad8ee0d4423212ae9f
     entity_id: binary_sensor.samjin_multi_ddd30701_ias_zone
@@ -17,6 +18,12 @@
     entity_id: 65312a63db44ea82e99ac2d2169c8c6e
     domain: binary_sensor
     trigger: device
+  - to:
+    - 'on'
+    entity_id:
+    - binary_sensor.hallway_hallway_trisensor_motion_detection
+    trigger: state
+    from:
   conditions:
   - condition: state
     entity_id: input_boolean.its_dark
@@ -273,15 +280,6 @@
   alias: Turn off Hallway light
   description: ''
   triggers:
-  - type: turned_off
-    device_id: 533a5aaab8fe12982ce62f61886d8417
-    entity_id: binary_sensor.hallway_motion
-    domain: binary_sensor
-    for:
-      hours: 0
-      minutes: 2
-      seconds: 0
-    trigger: device
   - type: no_motion
     device_id: ed21789e6ec60c517afbbf19b40d3cf4
     entity_id: 1f2d43a160cc67dd650a6e05e91defb0
@@ -291,6 +289,25 @@
       hours: 0
       minutes: 2
       seconds: 0
+  - trigger: state
+    entity_id:
+    - binary_sensor.hallway_hallway_trisensor_sensor_state_motion
+    from:
+    to:
+    - 'off'
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+  - trigger: motion.cleared
+    target:
+      entity_id: binary_sensor.hallway_hallway_trisensor_motion_detection
+    options:
+      behavior: each
+      for:
+        hours: 0
+        minutes: 2
+        seconds: 0
   conditions:
   - condition: device
     type: is_on
