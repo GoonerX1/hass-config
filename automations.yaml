@@ -703,7 +703,7 @@
   triggers:
   - above: '1'
     entity_id: sun.sun
-    value_template: '{{state.attributes.elevation}}'
+    value_template: '{{ state.attributes.elevation }}'
     trigger: numeric_state
   - at: 07:55:00
     trigger: time
@@ -713,22 +713,26 @@
     - above: '0'
       condition: numeric_state
       entity_id: sun.sun
-      value_template: '{{state.attributes.elevation}}'
+      value_template: '{{ state.attributes.elevation }}'
     - condition: state
       entity_id: binary_sensor.workday_sensor
       state: 'on'
     - condition: time
       after: 07:54:59
   actions:
-  - data: {}
+  - action: cover.open_cover
     target:
-      entity_id:
-      - cover.rfy_010101_1
-      - cover.rfy_010102_2
-    action: cover.open_cover
+      entity_id: cover.rfy_010102_2
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.garden_temperature
+        below: 25
+      sequence:
+      - action: cover.open_cover
+        target:
+          entity_id: cover.rfy_010101_1
   - action: cover.open_cover_tilt
-    metadata: {}
-    data: {}
     target:
       entity_id: cover.dining_venetian
   mode: single
@@ -3049,6 +3053,10 @@
     entity_id:
     - sensor.garden_temperature
     above: 25
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
   conditions:
   - condition: time
     before: '14:00:00'
