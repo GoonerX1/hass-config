@@ -1431,10 +1431,10 @@
     domain: binary_sensor
     trigger: device
     id: doorbell
-  - type: turned_on
-    device_id: a7a3cacedd9c5c8f8452e500af0150ff
-    entity_id: b07ded46e9a3cb519d6f78206a4a59f7
-    domain: binary_sensor
+  - device_id: a7a3cacedd9c5c8f8452e500af0150ff
+    domain: media_player
+    entity_id: a3f53683964c9da742e0f9ce78f8d0f9
+    type: turned_on
     trigger: device
     id: package
   - trigger: event.received
@@ -3026,12 +3026,13 @@
     entity_id: binary_sensor.g5_bullet_is_dark_2
     state: 'off'
   - condition: state
-    entity_id: binary_sensor.g4_instant_is_dark
-    state: 'off'
-  - condition: state
     entity_id: binary_sensor.g6_entry_is_dark
     state:
     - 'off'
+  - condition: state
+    entity_id: binary_sensor.g4_instant_is_dark
+    state: 'off'
+    enabled: false
   - condition: time
     after: 06:59:59
     enabled: false
