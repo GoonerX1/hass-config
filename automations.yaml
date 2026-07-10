@@ -2256,7 +2256,13 @@
       - d2f0b27730c64caf8645cb3a8fdef7d2
       - 1d1807340bf45e41030fb5d333863644
       - 43730e4f6dce450581ccb63a74498ec5
-    enabled: true
+    enabled: false
+  - action: automation.trigger
+    metadata: {}
+    target:
+      entity_id: automation.open_1st_landing_blind_am
+    data:
+      skip_condition: false
   - set_conversation_response: OK, I'm opening the kitchen venetian, 1st floor landing
       and living room blinds.
   mode: single
@@ -3514,7 +3520,7 @@
     metadata: {}
     data:
       message: Tomorrow, {{ states('sensor.waste_tomorrow') }} will be picked up.
-  - action: notify.mobile_app_hannahs_iphone_11
+  - action: notify.hannah
     metadata: {}
     data:
       message: Tomorrow, {{ states('sensor.waste_tomorrow') }} will be picked up.
@@ -3627,7 +3633,7 @@
               title: Resume schedule now
             action_data:
               climate: '{{ zone_climate }}'
-        action: notify.mobile_app_hannahs_iphone_11
+        action: notify.hannah
     - conditions:
       - condition: template
         value_template: '{{ trigger.to_state.state == ''off'' }}'
@@ -3679,7 +3685,7 @@
               title: Resume schedule now
             action_data:
               climate: '{{ zone_climate }}'
-        action: notify.mobile_app_hannahs_iphone_11
+        action: notify.hannah
   mode: restart
   variables:
     zone_climate: '{{ ''climate.'' ~ trigger.entity_id.split(''.'')[1] | replace(''_window'','''')
@@ -3815,7 +3821,7 @@
               data:
                 push:
                   interruption_level: time-sensitive
-            action: notify.mobile_app_hannahs_iphone_11
+            action: notify.hannah
           - choose:
             - conditions:
               - condition: state
@@ -3879,7 +3885,7 @@
               data:
                 push:
                   interruption_level: time-sensitive
-            action: notify.mobile_app_hannahs_iphone_11
+            action: notify.hannah
           - choose:
             - conditions:
               - condition: state

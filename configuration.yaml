@@ -93,6 +93,10 @@ notify:
     name: adrian_mobile
     services:
       - action: mobile_app_adrian_s26
+  - platform: group
+    name: hannah
+    services:
+      - action: mobile_app_hannahs_iphone_13
   - platform: rest
     name: WhatsApp
     resource: https://api.callmebot.com/whatsapp.php
