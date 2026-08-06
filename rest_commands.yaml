@@ -1,0 +1,55 @@
+# Contents of rest_commands.yaml
+# This file is included via: rest_command: !include rest_commands.yaml
+# in configuration.yaml - so it must NOT have its own top-level
+# "rest_command:" key, otherwise HA nests it twice.
+#
+# After adding: Developer Tools > YAML > "rest_command" reload
+# (or restart Home Assistant if that reload option isn't available).
+
+# --- Sonarr (TV) ---
+
+sonarr_lookup:
+  url: "http://192.168.34.206:8989/api/v3/series/lookup?term={{ term | urlencode }}"
+  method: GET
+  headers:
+    X-Api-Key: !secret sonarr_api
+  content_type: "application/json"
+
+sonarr_add_series:
+  url: "http://192.168.34.206:8989/api/v3/series"
+  method: POST
+  headers:
+    X-Api-Key: !secret sonarr_api
+  content_type: "application/json"
+  payload: "{{ payload }}"
+
+sonarr_quality_profiles:
+  url: "http://192.168.34.206:8989/api/v3/qualityprofile"
+  method: GET
+  headers:
+    X-Api-Key: !secret sonarr_api
+  content_type: "application/json"
+
+# --- Radarr (Movies) ---
+
+radarr_lookup:
+  url: "http://192.168.34.206:7878/api/v3/movie/lookup?term={{ term | urlencode }}"
+  method: GET
+  headers:
+    X-Api-Key: !secret radarr_api
+  content_type: "application/json"
+
+radarr_add_movie:
+  url: "http://192.168.34.206:7878/api/v3/movie"
+  method: POST
+  headers:
+    X-Api-Key: !secret radarr_api
+  content_type: "application/json"
+  payload: "{{ payload }}"
+
+radarr_quality_profiles:
+  url: "http://192.168.34.206:7878/api/v3/qualityprofile"
+  method: GET
+  headers:
+    X-Api-Key: !secret radarr_api
+  content_type: "application/json"

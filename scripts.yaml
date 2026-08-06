@@ -335,3 +335,107 @@ voice_weather_forecasts_full_llm_script_3:
     input:
       weather_entity: weather.openweathermap
   description: ''
+# Add to configuration.yaml under a "script:" key (or your scripts.yaml include).
+# These wrap the rest_command entities you already have, exposing them as
+# tools the Anthropic conversation agent can call during a voice/chat turn.
+#
+# NOTE: the "stop: response_variable:" pattern below is how HA scripts
+# return structured data to a caller (added a couple of years back).
+# Syntax can shift slightly between HA versions - if the config check
+# complains about the "stop" step, check the current script docs for
+# "response_variable" and adjust.
+
+sonarr_search:
+  alias: "Sonarr: search for a TV show"
+  description: "Searches Sonarr for a TV show by title and returns candidate matches with their tvdbId, year, and overview."
+  fields:
+    term:
+      description: "The show title to search for"
+      example: "Foundation"
+      selector:
+        text:
+  sequence:
+    - action: rest_command.sonarr_lookup
+      data:
+        term: "{{ term }}"
+      response_variable: lookup_result
+    - stop: ""
+      response_variable: lookup_result
+
+sonarr_add:
+  alias: "Sonarr: add a TV show"
+  description: "Adds a TV show to Sonarr by tvdbId (obtained from Sonarr: search for a TV show). Uses the HD - 720p/1080p quality profile and monitors + searches for the first season."
+  fields:
+    tvdb_id:
+      description: "The tvdbId of the show to add, from a prior search"
+      example: 457173
+      selector:
+        number:
+    title:
+      description: "The show's title, for confirmation"
+      example: "I Will Find You"
+      selector:
+        text:
+  sequence:
+    - action: rest_command.sonarr_add_series
+      data:
+        payload: >-
+          {{ {
+            "title": title,
+            "tvdbId": tvdb_id | int,
+            "qualityProfileId": 6,
+            "rootFolderPath": "/data/ds/tvshows",
+            "monitored": true,
+            "seasonFolder": true,
+            "addOptions": {"searchForMissingEpisodes": true}
+          } | tojson }}
+      response_variable: add_result
+    - stop: ""
+      response_variable: add_result
+
+radarr_search:
+  alias: "Radarr: search for a movie"
+  description: "Searches Radarr for a movie by title and returns candidate matches with their tmdbId, year, and overview."
+  fields:
+    term:
+      description: "The movie title to search for"
+      example: "Dune"
+      selector:
+        text:
+  sequence:
+    - action: rest_command.radarr_lookup
+      data:
+        term: "{{ term }}"
+      response_variable: lookup_result
+    - stop: ""
+      response_variable: lookup_result
+
+radarr_add:
+  alias: "Radarr: add a movie"
+  description: "Adds a movie to Radarr by tmdbId (obtained from Radarr: search for a movie). Uses the HD - 720p/1080p quality profile and monitors + searches for it."
+  fields:
+    tmdb_id:
+      description: "The tmdbId of the movie to add, from a prior search"
+      example: 438631
+      selector:
+        number:
+    title:
+      description: "The movie's title, for confirmation"
+      example: "Dune"
+      selector:
+        text:
+  sequence:
+    - action: rest_command.radarr_add_movie
+      data:
+        payload: >-
+          {{ {
+            "title": title,
+            "tmdbId": tmdb_id | int,
+            "qualityProfileId": 6,
+            "rootFolderPath": "/data/ds/movies",
+            "monitored": true,
+            "addOptions": {"searchForMovie": true}
+          } | tojson }}
+      response_variable: add_result
+    - stop: ""
+      response_variable: add_result

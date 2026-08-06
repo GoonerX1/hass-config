@@ -417,7 +417,7 @@
     - media_player.living_room_tv_4
     for:
       hours: 0
-      minutes: 5
+      minutes: 10
       seconds: 0
     from:
     - standby
@@ -448,7 +448,7 @@
     - media_player.living_room_tv_4
     for:
       hours: 0
-      minutes: 2
+      minutes: 10
       seconds: 0
     to:
     - 'off'
@@ -1933,7 +1933,7 @@
     data: {}
     target:
       area_id: 78a330ec08974b448c83c7339c6b2018
-    enabled: false
+    enabled: true
   mode: single
 - id: '1700344453717'
   alias: Turn off garden light from the garage
@@ -2121,7 +2121,7 @@
         behavior: any
   actions:
   - target:
-      entity_id: media_player.sony_xr_55a84j
+      device_id: 26b971f83e4e1b9ae5b8cd7e7886b3ff
     data:
       media:
         media_content_id: media-source://camera/camera.2rm_doorbell_low_resolution_channel
@@ -2249,22 +2249,21 @@
   conditions: []
   actions:
   - action: cover.open_cover
-    metadata: {}
+    target:
+      entity_id:
+      - cover.dining_venetian
+      - cover.rfy_010102_2
     data: {}
-    target:
-      device_id:
-      - d2f0b27730c64caf8645cb3a8fdef7d2
-      - 1d1807340bf45e41030fb5d333863644
-      - 43730e4f6dce450581ccb63a74498ec5
-    enabled: false
-  - action: automation.trigger
-    metadata: {}
-    target:
-      entity_id: automation.open_1st_landing_blind_am
-    data:
-      skip_condition: false
-  - set_conversation_response: OK, I'm opening the kitchen venetian, 1st floor landing
-      and living room blinds.
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.garden_temperature
+        below: 25
+      sequence:
+      - action: cover.open_cover
+        target:
+          entity_id: cover.rfy_010101_1
+  - set_conversation_response: OK, I'm opening the blinds.
   mode: single
 - id: '1730108529661'
   alias: Turn on Garden light with motion
@@ -2934,6 +2933,7 @@
   - condition: numeric_state
     entity_id: zone.home
     above: 0
+    enabled: false
   actions:
   - action: script.run_hot_water_for_1hr
     metadata: {}
@@ -2963,9 +2963,18 @@
       value_template: '  {{ states(''sensor.octopus_free_electricity_session_active_in_last_24h'')
         | int > 0 }}'
       alias: If Octopus Free Electricity has been on in last 24H
-  - condition: numeric_state
-    entity_id: zone.home
-    above: 0
+  - condition: or
+    alias: Household member home now, or home within the last 10 hours
+    conditions:
+    - condition: numeric_state
+      entity_id: zone.home
+      above: 0
+      alias: Currently home
+    - condition: template
+      value_template: '{{ state_attr(''input_datetime.last_someone_home'',''timestamp'')
+        is not none and (now().timestamp() - state_attr(''input_datetime.last_someone_home'',''timestamp''))
+        <= 36000 }}'
+      alias: Home within the last 10 hours
   actions:
   - action: input_boolean.turn_on
     metadata: {}
@@ -2992,11 +3001,18 @@
     below: 100
     for:
       hours: 0
-      minutes: 15
+      minutes: 5
       seconds: 0
   conditions:
   - condition: time
     after: '14:00:00'
+  - condition: sun.elevation
+    options:
+      threshold:
+        type: below
+        value:
+          active_choice: number
+          number: 5
   actions:
   - action: input_boolean.turn_on
     metadata: {}
@@ -3228,8 +3244,11 @@
   - trigger: state
     entity_id:
     - binary_sensor.octopus_energy_a_038dd11d_octoplus_free_electricity_session
-    from: 'off'
-    to: 'on'
+    - calendar.octopus_energy_a_038dd11d_octoplus_power_up
+    from:
+    - 'off'
+    to:
+    - 'on'
   conditions: []
   actions:
   - type: turn_on
@@ -3255,6 +3274,13 @@
     - binary_sensor.octopus_energy_a_038dd11d_octoplus_free_electricity_session
     from: 'on'
     to: 'off'
+  - trigger: state
+    entity_id:
+    - calendar.octopus_energy_a_038dd11d_octoplus_power_up
+    from:
+    - 'on'
+    to:
+    - 'off'
   conditions: []
   actions:
   - type: turn_off
@@ -4227,3 +4253,44 @@
         continue_on_error: true
         target:
           entity_id: sensor.x1ade_mail_mail
+- id: '1784103416705'
+  alias: 'Presence: Track Last Home Time'
+  description: Stamps input_datetime.last_someone_home whenever anyone is home, so
+    other automations (e.g. hot water) can check 'home now or within last N hours'.
+  triggers:
+  - entity_id: zone.home
+    trigger: state
+  - minutes: /30
+    trigger: time_pattern
+  conditions:
+  - above: 0
+    condition: numeric_state
+    entity_id: zone.home
+  actions:
+  - action: input_datetime.set_datetime
+    data:
+      datetime: '{{ now() }}'
+    target:
+      entity_id: input_datetime.last_someone_home
+  mode: single
+- id: '1785140174718'
+  alias: Restart UDM Pro Weekly
+  description: ''
+  triggers:
+  - trigger: time
+    at: 01:00:00
+    weekday:
+    - mon
+  conditions: []
+  actions:
+  - action: button.press
+    metadata: {}
+    target:
+      entity_id: button.dream_machine_pro_restart
+    data: {}
+  - action: notify.adrian_mobile
+    metadata: {}
+    data:
+      message: UDM Pro has been restarted on the schedule
+      title: UDM Pro Restarted
+  mode: single

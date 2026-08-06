@@ -3,19 +3,19 @@ cloud:
 frontend:
   themes: !include_dir_merge_named themes
 
-http:
-  #server_port: 8123
-  #ssl_certificate: /ssl/fullchain.pem
-  #ssl_key: /ssl/privkey.pem
-  #base_url: https://hassio.x1ade.co.uk:8123
-  use_x_forwarded_for: true
-  trusted_proxies:
-    - 127.0.0.1
-    - 192.168.34.0/24
-    - 95.172.225.138
-    - 172.30.33.12
-  ip_ban_enabled: false
-  login_attempts_threshold: 5
+#http:
+#server_port: 8123
+#ssl_certificate: /ssl/fullchain.pem
+#ssl_key: /ssl/privkey.pem
+#base_url: https://hassio.x1ade.co.uk:8123
+#  use_x_forwarded_for: true
+#  trusted_proxies:
+#    - 127.0.0.1
+#    - 192.168.34.0/24
+#    - 95.172.225.138
+#    - 172.30.33.12
+#  ip_ban_enabled: false
+#  login_attempts_threshold: 5
 
 homeassistant:
   customize: !include customize.yaml
@@ -36,6 +36,7 @@ sensor: !include sensors.yaml
 media_player: !include media_players.yaml
 template: !include templates.yaml
 intent: !include intents.yaml
+rest_command: !include rest_commands.yaml
 
 logger:
   default: error
