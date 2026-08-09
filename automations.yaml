@@ -30,14 +30,13 @@
     state: 'on'
   - condition: device
     type: is_off
-    device_id: a3c94166f05f3c37cb016a3dd08dae8d
+    device_id: 204aaa3b09c64d020e0cd987db91f589
     entity_id: b7b639411b6aaa8ce8e76a5bd057dcbd
     domain: light
   actions:
   - action: light.turn_on
     target:
-      device_id:
-      - a3c94166f05f3c37cb016a3dd08dae8d
+      device_id: 204aaa3b09c64d020e0cd987db91f589
     data: {}
   mode: restart
 - id: '1580631052994'
@@ -60,7 +59,7 @@
   actions:
   - action: light.turn_on
     target:
-      device_id: e2d20d0afdb63319d4a238d68ee03177
+      device_id: 601dce6a2b662fbaf4a98bde8e868320
     data: {}
   mode: single
 - id: '1580660725532'
@@ -81,8 +80,7 @@
   actions:
   - action: light.turn_on
     target:
-      device_id:
-      - a3c94166f05f3c37cb016a3dd08dae8d
+      device_id: 204aaa3b09c64d020e0cd987db91f589
     data: {}
   mode: single
 - id: '1580662218243'
@@ -110,18 +108,13 @@
   conditions:
   - condition: device
     type: is_on
-    device_id: e2d20d0afdb63319d4a238d68ee03177
+    device_id: 601dce6a2b662fbaf4a98bde8e868320
     entity_id: 79c3b243a355f0d5951eff26cba06b1b
     domain: switch
   actions:
-  - data: {}
-    target:
-      device_id: e2d20d0afdb63319d4a238d68ee03177
-    enabled: false
-    action: switch.toggle
   - action: light.turn_off
     target:
-      device_id: e2d20d0afdb63319d4a238d68ee03177
+      device_id: 601dce6a2b662fbaf4a98bde8e868320
     data: {}
   mode: single
 - id: '1580662385610'
@@ -148,7 +141,7 @@
     metadata: {}
     data: {}
     target:
-      device_id: a3267ebbe2764c6989d5ebe1d7b9554a
+      device_id: 3c6c5cb7d66589d40e346aadabd62c24
   - action: switch.turn_off
     metadata: {}
     target:
@@ -253,9 +246,9 @@
   alias: Turn on Kitchen Lights AM
   description: ''
   triggers:
-  - device_id: ed654175c0254d6fb94bd6cdf6015db3
+  - device_id: 6c41e633a26caeaf1cf2d735959a2f9b
     domain: media_player
-    entity_id: media_player.bedroom_sonos
+    entity_id: 66eca2d51c26e16c33c2b389871a122d
     type: playing
     trigger: device
   conditions:
@@ -311,8 +304,8 @@
   conditions:
   - condition: device
     type: is_on
-    device_id: a3c94166f05f3c37cb016a3dd08dae8d
-    entity_id: fd4a56ca5443d87abae437d573ba4349
+    device_id: 204aaa3b09c64d020e0cd987db91f589
+    entity_id: 45cbd75ece961f271cf330ed4a288ce0
     domain: switch
   - condition: state
     entity_id: light.shelly1minig3_dcda0ce268cc_switch_0
@@ -378,8 +371,7 @@
   actions:
   - action: light.turn_on
     target:
-      device_id:
-      - a3c94166f05f3c37cb016a3dd08dae8d
+      device_id: 204aaa3b09c64d020e0cd987db91f589
     data: {}
   - data: {}
     entity_id: script.1580666071205
@@ -466,10 +458,10 @@
     device_id: a67dedf134ee2f4bbc2865fe5b237f69
     entity_id: 471485bbf41dd72c6313a6c854f02b0a
     domain: light
-  - device_id: d8a7eb3f4ead49fcb85273cf51fe4e72
+  - type: turn_off
+    device_id: 115b7c19d9c2de9c743a878c9990bf66
+    entity_id: e7ce57dff1cd809492608ac6fab3316d
     domain: light
-    entity_id: light.sengled_z01_a60eae27_b62f0403_level_light_color_on_off
-    type: turn_off
   mode: single
 - id: '1583001303502'
   alias: Turn on utility light when door is opened
@@ -552,7 +544,7 @@
   conditions:
   - condition: device
     type: is_off
-    device_id: d9a8034756033c0efa1844a4a4486560
+    device_id: df146928abbf585f8f032d2d32844a6f
     entity_id: c287cfac34445b82c3056e9c55d57853
     domain: switch
   - condition: state
@@ -561,7 +553,7 @@
   actions:
   - action: light.turn_on
     target:
-      device_id: d9a8034756033c0efa1844a4a4486560
+      device_id: df146928abbf585f8f032d2d32844a6f
     data: {}
   mode: single
 - id: '1586016368673'
@@ -593,13 +585,13 @@
       after: '13:00'
     - condition: device
       type: is_on
-      device_id: d9a8034756033c0efa1844a4a4486560
+      device_id: df146928abbf585f8f032d2d32844a6f
       entity_id: c287cfac34445b82c3056e9c55d57853
       domain: switch
   actions:
   - action: light.turn_off
     target:
-      device_id: d9a8034756033c0efa1844a4a4486560
+      device_id: df146928abbf585f8f032d2d32844a6f
     data: {}
   mode: single
 - id: '1586016875417'
@@ -616,20 +608,19 @@
     conditions:
     - condition: device
       type: is_off
-      device_id: a3c94166f05f3c37cb016a3dd08dae8d
-      entity_id: fd4a56ca5443d87abae437d573ba4349
+      device_id: 204aaa3b09c64d020e0cd987db91f589
+      entity_id: 45cbd75ece961f271cf330ed4a288ce0
       domain: switch
     - condition: device
       type: is_on
-      device_id: e2d20d0afdb63319d4a238d68ee03177
+      device_id: 601dce6a2b662fbaf4a98bde8e868320
       entity_id: 79c3b243a355f0d5951eff26cba06b1b
       domain: switch
   actions:
   - action: light.turn_on
     data: {}
     target:
-      device_id:
-      - a3c94166f05f3c37cb016a3dd08dae8d
+      device_id: 204aaa3b09c64d020e0cd987db91f589
 - id: '1586017052904'
   alias: Turn on 1st landing light 1st stairway motion
   description: ''
@@ -646,13 +637,13 @@
     conditions:
     - condition: device
       type: is_off
-      device_id: e2d20d0afdb63319d4a238d68ee03177
+      device_id: 601dce6a2b662fbaf4a98bde8e868320
       entity_id: 12201f94abfa157cb1d8e4359a677e31
       domain: light
     - condition: device
       type: is_on
-      device_id: a3c94166f05f3c37cb016a3dd08dae8d
-      entity_id: fd4a56ca5443d87abae437d573ba4349
+      device_id: 204aaa3b09c64d020e0cd987db91f589
+      entity_id: 45cbd75ece961f271cf330ed4a288ce0
       domain: switch
     - condition: state
       entity_id: input_boolean.its_dark
@@ -660,7 +651,7 @@
   actions:
   - action: light.turn_on
     target:
-      device_id: e2d20d0afdb63319d4a238d68ee03177
+      device_id: 601dce6a2b662fbaf4a98bde8e868320
     data: {}
   mode: single
 - id: '1586608671873'
@@ -751,7 +742,7 @@
     metadata: {}
     data: {}
     target:
-      device_id: e04c36055c27bc8fe3480960b40cfc70
+      device_id: c71c404ab4bca5763814058953e7cecf
   mode: single
 - id: '1593442270420'
   alias: Turn off Bedroom Light
@@ -768,7 +759,7 @@
     metadata: {}
     data: {}
     target:
-      device_id: e04c36055c27bc8fe3480960b40cfc70
+      device_id: c71c404ab4bca5763814058953e7cecf
 - id: '1594049810396'
   alias: Turn on 1st landing light 2nd stairway motion
   description: ''
@@ -781,12 +772,12 @@
     conditions:
     - condition: device
       type: is_off
-      device_id: e2d20d0afdb63319d4a238d68ee03177
+      device_id: 601dce6a2b662fbaf4a98bde8e868320
       entity_id: 79c3b243a355f0d5951eff26cba06b1b
       domain: switch
     - condition: device
       type: is_on
-      device_id: d9a8034756033c0efa1844a4a4486560
+      device_id: df146928abbf585f8f032d2d32844a6f
       entity_id: c287cfac34445b82c3056e9c55d57853
       domain: switch
   - condition: not
@@ -800,7 +791,7 @@
   actions:
   - action: light.turn_on
     target:
-      device_id: e2d20d0afdb63319d4a238d68ee03177
+      device_id: 601dce6a2b662fbaf4a98bde8e868320
     data: {}
   mode: single
 - id: '1596489565862'
@@ -931,18 +922,18 @@
     conditions:
     - condition: device
       type: is_on
-      device_id: e2d20d0afdb63319d4a238d68ee03177
+      device_id: 601dce6a2b662fbaf4a98bde8e868320
       entity_id: 79c3b243a355f0d5951eff26cba06b1b
       domain: switch
     - condition: device
       type: is_off
-      device_id: d9a8034756033c0efa1844a4a4486560
+      device_id: df146928abbf585f8f032d2d32844a6f
       entity_id: c287cfac34445b82c3056e9c55d57853
       domain: switch
   actions:
   - action: light.turn_on
     target:
-      device_id: d9a8034756033c0efa1844a4a4486560
+      device_id: df146928abbf585f8f032d2d32844a6f
     data: {}
   mode: single
 - id: '1608710632187'
@@ -1128,7 +1119,7 @@
     conditions:
     - condition: device
       type: is_on
-      device_id: d9a8034756033c0efa1844a4a4486560
+      device_id: df146928abbf585f8f032d2d32844a6f
       entity_id: c287cfac34445b82c3056e9c55d57853
       domain: switch
     - condition: time
@@ -1136,7 +1127,7 @@
   actions:
   - action: light.turn_off
     target:
-      device_id: d9a8034756033c0efa1844a4a4486560
+      device_id: df146928abbf585f8f032d2d32844a6f
     data: {}
   mode: single
 - id: '1640188248946'
@@ -1145,12 +1136,12 @@
   use_blueprint:
     path: robinsmidsrod/zwavejs-aeon-labs-aeotec-zw130-wallmote-quad-all-scenes-supported.yaml
     input:
-      zwavejs_device: 3c5fa67d9172d77675dd2f72e7ee11f4
+      zwavejs_device: 9074e94c4065cdc34c3275848d3afa78
       tap_top_left_actions:
       - target:
           device_id:
-          - d8a7eb3f4ead49fcb85273cf51fe4e72
           - a67dedf134ee2f4bbc2865fe5b237f69
+          - 115b7c19d9c2de9c743a878c9990bf66
         data:
           transition: 1
           brightness_pct: 100
@@ -1202,14 +1193,13 @@
         value_template: '{{state.attributes.elevation}}'
     - condition: device
       type: is_off
-      device_id: a3c94166f05f3c37cb016a3dd08dae8d
-      entity_id: fd4a56ca5443d87abae437d573ba4349
+      device_id: 204aaa3b09c64d020e0cd987db91f589
+      entity_id: 45cbd75ece961f271cf330ed4a288ce0
       domain: switch
   actions:
   - action: light.turn_on
     target:
-      device_id:
-      - a3c94166f05f3c37cb016a3dd08dae8d
+      device_id: 204aaa3b09c64d020e0cd987db91f589
     data: {}
   mode: single
 - id: '1664262210155'
@@ -1351,33 +1341,21 @@
   description: ''
   triggers:
   - type: turned_on
-    device_id: a3c94166f05f3c37cb016a3dd08dae8d
-    entity_id: fd4a56ca5443d87abae437d573ba4349
+    device_id: 204aaa3b09c64d020e0cd987db91f589
+    entity_id: 45cbd75ece961f271cf330ed4a288ce0
     domain: switch
     trigger: device
     id: Hall
-    for:
-      hours: 0
-      minutes: 20
-      seconds: 0
   - type: turned_on
-    device_id: e2d20d0afdb63319d4a238d68ee03177
+    device_id: 601dce6a2b662fbaf4a98bde8e868320
     entity_id: 79c3b243a355f0d5951eff26cba06b1b
     domain: switch
-    for:
-      hours: 0
-      minutes: 20
-      seconds: 0
     trigger: device
     id: 1st
   - type: turned_on
-    device_id: d9a8034756033c0efa1844a4a4486560
+    device_id: df146928abbf585f8f032d2d32844a6f
     entity_id: c287cfac34445b82c3056e9c55d57853
     domain: switch
-    for:
-      hours: 0
-      minutes: 20
-      seconds: 0
     trigger: device
     id: 2nd
   conditions:
@@ -1399,7 +1377,7 @@
       - Hall
     then:
     - type: turn_off
-      device_id: a3c94166f05f3c37cb016a3dd08dae8d
+      device_id: 204aaa3b09c64d020e0cd987db91f589
       entity_id: b7b639411b6aaa8ce8e76a5bd057dcbd
       domain: light
   - if:
@@ -1408,7 +1386,7 @@
       - 1st
     then:
     - type: turn_off
-      device_id: e2d20d0afdb63319d4a238d68ee03177
+      device_id: 601dce6a2b662fbaf4a98bde8e868320
       entity_id: 12201f94abfa157cb1d8e4359a677e31
       domain: light
   - if:
@@ -1417,7 +1395,7 @@
       - 2nd
     then:
     - type: turn_off
-      device_id: d9a8034756033c0efa1844a4a4486560
+      device_id: df146928abbf585f8f032d2d32844a6f
       entity_id: e46810b3e0d32d1979c1f95e7ee3f5d7
       domain: light
   mode: single
@@ -1426,14 +1404,14 @@
   description: ''
   triggers:
   - type: occupied
-    device_id: a7a3cacedd9c5c8f8452e500af0150ff
+    device_id: dba216959c8b59ae455371ed46ff0002
     entity_id: 2a0adb46891cc99d86f41fae76905d14
     domain: binary_sensor
     trigger: device
     id: doorbell
-  - device_id: a7a3cacedd9c5c8f8452e500af0150ff
+  - device_id: dba216959c8b59ae455371ed46ff0002
     domain: media_player
-    entity_id: a3f53683964c9da742e0f9ce78f8d0f9
+    entity_id: 557dfe696b876dee248a5ef1347d6cb8
     type: turned_on
     trigger: device
     id: package
@@ -1563,8 +1541,8 @@
       domain: light
     - condition: device
       type: is_on
-      device_id: d8a7eb3f4ead49fcb85273cf51fe4e72
-      entity_id: light.sengled_z01_a60eae27_b62f0403_level_light_color_on_off
+      device_id: 115b7c19d9c2de9c743a878c9990bf66
+      entity_id: e7ce57dff1cd809492608ac6fab3316d
       domain: light
   - condition: time
     after: '19:00:00'
@@ -1611,8 +1589,8 @@
       domain: light
     - condition: device
       type: is_on
-      device_id: d8a7eb3f4ead49fcb85273cf51fe4e72
-      entity_id: light.sengled_z01_a60eae27_b62f0403_level_light_color_on_off
+      device_id: 115b7c19d9c2de9c743a878c9990bf66
+      entity_id: e7ce57dff1cd809492608ac6fab3316d
       domain: light
   - condition: state
     entity_id: input_boolean.its_dark
@@ -1699,38 +1677,38 @@
 - id: '1681499961123'
   alias: Flash LR Stand with stair motion
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - binary_sensor.1st_landing_trisensor_motion_2
     to: 'on'
-  condition:
+    trigger: state
+  conditions:
   - condition: device
     type: is_on
-    device_id: d8a7eb3f4ead49fcb85273cf51fe4e72
-    entity_id: light.sengled_z01_a60eae27_b62f0403_level_light_color_on_off
+    device_id: 115b7c19d9c2de9c743a878c9990bf66
+    entity_id: e7ce57dff1cd809492608ac6fab3316d
     domain: light
-  action:
-  - service: scene.create
-    data:
+  actions:
+  - data:
       scene_id: thebeforetimes
       snapshot_entities: light.sengled_z01_a60eae27_b62f0403_level_light_color_on_off
-  - service: light.turn_on
-    data:
+    action: scene.create
+  - data:
       transition: 1
       brightness_pct: 49
       flash: long
     target:
-      device_id: d8a7eb3f4ead49fcb85273cf51fe4e72
+      device_id: 115b7c19d9c2de9c743a878c9990bf66
+    action: light.turn_on
   - delay:
       hours: 0
       minutes: 0
       seconds: 1
       milliseconds: 0
-  - service: scene.turn_on
-    data: {}
+  - data: {}
     target:
       entity_id: scene.thebeforetimes
+    action: scene.turn_on
   mode: single
 - id: '1681904178075'
   alias: Tell Hannah to get out of bed
@@ -1827,14 +1805,14 @@
         action: light.turn_on
         target:
           entity_id: light.yeelight_lamp9_0x1d64e9b8
-          device_id: e04c36055c27bc8fe3480960b40cfc70
+          device_id: f7aa4554a23d22a03463dc3bffecf838
       tap_top_left_actions:
       - data:
           brightness: 255
         target:
           device_id:
-          - d8a7eb3f4ead49fcb85273cf51fe4e72
           - a67dedf134ee2f4bbc2865fe5b237f69
+          - 115b7c19d9c2de9c743a878c9990bf66
         action: light.toggle
       hold_bottom_left_actions:
       - action: cover.close_cover
@@ -1853,8 +1831,8 @@
         data: {}
         target:
           device_id:
-          - 74bcd8b68e2df943d4b0c6101c8656cb
-          - 7d5e61c0c8600126739996ac019c4728
+          - 99df6fb8658018f2ddd6f113361bb2c7
+          - bef964e283740c791a9d677a057ad45a
 - id: '1700339669800'
   alias: Turn on living room lights when its dark
   description: ''
@@ -1938,40 +1916,40 @@
 - id: '1700344453717'
   alias: Turn off garden light from the garage
   description: ''
-  trigger:
-  - platform: device
-    type: changed_states
-    device_id: 489c28314c192a6e1d9a8cbe05b6fba8
+  triggers:
+  - type: changed_states
+    device_id: 0b6c0d09e3b1e5fee02a12e963d03bf8
     entity_id: d6d40ca45c6f8e5f39ba87fe3af77f2e
     domain: switch
-  condition:
+    trigger: device
+  conditions:
   - condition: device
     type: is_on
     device_id: 36c2bf048f36d87ee0e11cbc7d175d34
     entity_id: 992c1b7c5a1312225938f4fc1dc4b41e
     domain: switch
-  action:
-  - service: switch.turn_off
-    data: {}
+  actions:
+  - data: {}
     target:
       device_id: 36c2bf048f36d87ee0e11cbc7d175d34
+    action: switch.turn_off
   mode: single
 - id: '1700344697048'
   alias: Turn on garden light from garage
   description: ''
-  trigger:
-  - platform: device
-    type: turned_on
-    device_id: 489c28314c192a6e1d9a8cbe05b6fba8
+  triggers:
+  - type: turned_on
+    device_id: 0b6c0d09e3b1e5fee02a12e963d03bf8
     entity_id: d6d40ca45c6f8e5f39ba87fe3af77f2e
     domain: switch
-  condition:
+    trigger: device
+  conditions:
   - condition: device
     type: is_off
     device_id: 36c2bf048f36d87ee0e11cbc7d175d34
     entity_id: 992c1b7c5a1312225938f4fc1dc4b41e
     domain: switch
-  action:
+  actions:
   - data: {}
     target:
       device_id: 36c2bf048f36d87ee0e11cbc7d175d34
@@ -2084,7 +2062,7 @@
     is pressed.
   triggers:
   - type: occupied
-    device_id: a7a3cacedd9c5c8f8452e500af0150ff
+    device_id: dba216959c8b59ae455371ed46ff0002
     entity_id: 2a0adb46891cc99d86f41fae76905d14
     domain: binary_sensor
     trigger: device
@@ -2116,12 +2094,12 @@
       type: is_on
     - condition: media_player.is_on
       target:
-        device_id: 26b971f83e4e1b9ae5b8cd7e7886b3ff
+        device_id: 8ced8ebe8bf65ca7f49f7643982a9051
       options:
         behavior: any
   actions:
   - target:
-      device_id: 26b971f83e4e1b9ae5b8cd7e7886b3ff
+      device_id: 8ced8ebe8bf65ca7f49f7643982a9051
     data:
       media:
         media_content_id: media-source://camera/camera.2rm_doorbell_low_resolution_channel
@@ -2147,12 +2125,12 @@
   conditions: []
   actions:
   - type: turn_on
-    device_id: ed654175c0254d6fb94bd6cdf6015db3
-    entity_id: a0d79ffb2839638050bf8e12ecc36c84
+    device_id: 6c41e633a26caeaf1cf2d735959a2f9b
+    entity_id: 43f469a7747f8e75a8af2873eff08032
     domain: switch
   - type: turn_off
-    device_id: ed654175c0254d6fb94bd6cdf6015db3
-    entity_id: 121e8233cd92267dce2daf36a3d25d09
+    device_id: 6c41e633a26caeaf1cf2d735959a2f9b
+    entity_id: 43f469a7747f8e75a8af2873eff08032
     domain: switch
   - set_conversation_response: OK. I've set the bedroom sonos alarm for five thirty
       and turned off your normal alarm.
@@ -2166,8 +2144,8 @@
   conditions: []
   actions:
   - type: turn_on
-    device_id: ed654175c0254d6fb94bd6cdf6015db3
-    entity_id: 121e8233cd92267dce2daf36a3d25d09
+    device_id: 6c41e633a26caeaf1cf2d735959a2f9b
+    entity_id: 43f469a7747f8e75a8af2873eff08032
     domain: switch
   - set_conversation_response: OK. I've set your Bedroom Sonos alarm for six twenty
       nine tomorrow morning.
@@ -2176,7 +2154,7 @@
   alias: Sonos alarm play kitchen Kerrang Radio
   description: ''
   triggers:
-  - device_id: ed654175c0254d6fb94bd6cdf6015db3
+  - device_id: 6c41e633a26caeaf1cf2d735959a2f9b
     domain: media_player
     entity_id: 66eca2d51c26e16c33c2b389871a122d
     type: playing
@@ -2363,12 +2341,12 @@
   conditions: []
   actions:
   - type: turn_off
-    device_id: ed654175c0254d6fb94bd6cdf6015db3
-    entity_id: a0d79ffb2839638050bf8e12ecc36c84
+    device_id: 6c41e633a26caeaf1cf2d735959a2f9b
+    entity_id: 43f469a7747f8e75a8af2873eff08032
     domain: switch
   - type: turn_off
-    device_id: ed654175c0254d6fb94bd6cdf6015db3
-    entity_id: 121e8233cd92267dce2daf36a3d25d09
+    device_id: 6c41e633a26caeaf1cf2d735959a2f9b
+    entity_id: 43f469a7747f8e75a8af2873eff08032
     domain: switch
   - set_conversation_response: 'OK. I''ve turned off the sonos alarms for tomorrow. '
   mode: single
@@ -2505,8 +2483,8 @@
     data: {}
     target:
       device_id:
-      - 74bcd8b68e2df943d4b0c6101c8656cb
-      - 7d5e61c0c8600126739996ac019c4728
+      - 99df6fb8658018f2ddd6f113361bb2c7
+      - bef964e283740c791a9d677a057ad45a
   mode: single
 - id: '1737539650260'
   alias: 'Assist: Turn off bedroom lamps'
@@ -2519,12 +2497,6 @@
     command: Turn off the lamps
   conditions: []
   actions:
-  - action: switch.turn_off
-    metadata: {}
-    data: {}
-    target:
-      device_id: e04c36055c27bc8fe3480960b40cfc70
-    enabled: false
   - action: light.turn_off
     metadata: {}
     data:
@@ -2532,7 +2504,7 @@
     target:
       device_id:
       - 5b2d269d470db7846b3861b9d8dee8a4
-      - e04c36055c27bc8fe3480960b40cfc70
+      - f7aa4554a23d22a03463dc3bffecf838
   - action: assist_satellite.announce
     metadata: {}
     data: {}
@@ -2550,12 +2522,6 @@
     command: Turn on the bedroom lamps
   conditions: []
   actions:
-  - action: switch.turn_on
-    metadata: {}
-    data: {}
-    target:
-      device_id: e04c36055c27bc8fe3480960b40cfc70
-    enabled: false
   - action: light.turn_on
     metadata: {}
     data:
@@ -2565,7 +2531,7 @@
     target:
       device_id:
       - 5b2d269d470db7846b3861b9d8dee8a4
-      - e04c36055c27bc8fe3480960b40cfc70
+      - f7aa4554a23d22a03463dc3bffecf838
   - action: assist_satellite.announce
     metadata: {}
     data:
@@ -3251,10 +3217,11 @@
     - 'on'
   conditions: []
   actions:
-  - type: turn_on
-    device_id: 843dcc5e38140b853b397f677b12aea9
-    entity_id: 7d3034c4be11e46e8bd0dcc6d42eee46
-    domain: switch
+  - action: switch.turn_on
+    metadata: {}
+    target:
+      entity_id: switch.fstwifitu_switch_1
+    data: {}
   mode: single
 - id: '1754921228807'
   alias: Voice - Weather Forecast - Local Assist Blueprint
@@ -3283,10 +3250,11 @@
     - 'off'
   conditions: []
   actions:
-  - type: turn_off
-    device_id: 843dcc5e38140b853b397f677b12aea9
-    entity_id: 7d3034c4be11e46e8bd0dcc6d42eee46
-    domain: switch
+  - action: switch.turn_off
+    metadata: {}
+    target:
+      entity_id: switch.fstwifitu_switch_1
+    data: {}
   mode: single
 - id: '1759306540400'
   alias: Voice - Weather Forecast - Local Assist Blueprint
@@ -3562,21 +3530,21 @@
     conditions:
     - condition: device
       type: is_on
-      device_id: 74bcd8b68e2df943d4b0c6101c8656cb
+      device_id: 99df6fb8658018f2ddd6f113361bb2c7
       entity_id: 06b28ebbc13a817aef2dd5827468c95d
       domain: switch
     - condition: device
       type: is_on
-      device_id: 7d5e61c0c8600126739996ac019c4728
+      device_id: bef964e283740c791a9d677a057ad45a
       entity_id: 911f893142ce5afa37c0bfd9b82a3c97
       domain: switch
   actions:
   - type: turn_off
-    device_id: 74bcd8b68e2df943d4b0c6101c8656cb
+    device_id: 99df6fb8658018f2ddd6f113361bb2c7
     entity_id: 06b28ebbc13a817aef2dd5827468c95d
     domain: switch
   - type: turn_off
-    device_id: 7d5e61c0c8600126739996ac019c4728
+    device_id: bef964e283740c791a9d677a057ad45a
     entity_id: 911f893142ce5afa37c0bfd9b82a3c97
     domain: switch
   mode: single
