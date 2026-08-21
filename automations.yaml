@@ -8,6 +8,7 @@
     from:
     to:
     - 'on'
+    enabled: false
   - type: opened
     device_id: 032e6037fba540ad8ee0d4423212ae9f
     entity_id: binary_sensor.samjin_multi_ddd30701_ias_zone
@@ -24,6 +25,12 @@
     - binary_sensor.hallway_hallway_trisensor_motion_detection
     trigger: state
     from:
+    enabled: false
+  - trigger: occupancy.detected
+    target:
+      device_id: efb5e625c084fcfa7b1459d3bd7c515b
+    options:
+      behavior: first
   conditions:
   - condition: state
     entity_id: input_boolean.its_dark
@@ -59,7 +66,7 @@
   actions:
   - action: light.turn_on
     target:
-      device_id: 601dce6a2b662fbaf4a98bde8e868320
+      device_id: 3a827eb37776e8edb4b9a3192eba2d11
     data: {}
   mode: single
 - id: '1580660725532'
@@ -106,15 +113,13 @@
       minutes: 1
       seconds: 0
   conditions:
-  - condition: device
-    type: is_on
-    device_id: 601dce6a2b662fbaf4a98bde8e868320
-    entity_id: 79c3b243a355f0d5951eff26cba06b1b
-    domain: switch
+  - condition: state
+    entity_id: switch.shelly1minig3_d885ac060a64
+    state: 'on'
   actions:
   - action: light.turn_off
     target:
-      device_id: 601dce6a2b662fbaf4a98bde8e868320
+      entity_id: light.1st_landing_shelly1minig3_d885ac060a64
     data: {}
   mode: single
 - id: '1580662385610'
@@ -282,6 +287,7 @@
       hours: 0
       minutes: 2
       seconds: 0
+    enabled: false
   - trigger: state
     entity_id:
     - binary_sensor.hallway_hallway_trisensor_sensor_state_motion
@@ -292,6 +298,7 @@
       hours: 0
       minutes: 2
       seconds: 0
+    enabled: false
   - trigger: motion.cleared
     target:
       entity_id: binary_sensor.hallway_hallway_trisensor_motion_detection
@@ -301,15 +308,27 @@
         hours: 0
         minutes: 2
         seconds: 0
+    enabled: false
+  - trigger: occupancy.cleared
+    target:
+      device_id: efb5e625c084fcfa7b1459d3bd7c515b
+    options:
+      behavior: all
+      for:
+        hours: 0
+        minutes: 0
+        seconds: 10
   conditions:
-  - condition: device
-    type: is_on
-    device_id: 204aaa3b09c64d020e0cd987db91f589
-    entity_id: 45cbd75ece961f271cf330ed4a288ce0
-    domain: switch
-  - condition: state
-    entity_id: light.shelly1minig3_dcda0ce268cc_switch_0
-    state: 'on'
+  - condition: or
+    conditions:
+    - condition: device
+      type: is_on
+      device_id: 204aaa3b09c64d020e0cd987db91f589
+      entity_id: b7b639411b6aaa8ce8e76a5bd057dcbd
+      domain: light
+    - condition: state
+      entity_id: light.shelly1minig3_dcda0ce268cc_switch_0
+      state: 'on'
   actions:
   - action: light.turn_off
     data: {}
@@ -542,18 +561,16 @@
     domain: binary_sensor
     trigger: device
   conditions:
-  - condition: device
-    type: is_off
-    device_id: df146928abbf585f8f032d2d32844a6f
-    entity_id: c287cfac34445b82c3056e9c55d57853
-    domain: switch
+  - condition: state
+    entity_id: switch.shelly1minig3_80b54e3efec8
+    state: 'off'
   - condition: state
     entity_id: input_boolean.its_dark
     state: 'on'
   actions:
   - action: light.turn_on
     target:
-      device_id: df146928abbf585f8f032d2d32844a6f
+      entity_id: light.2nd_landing_shelly1minig3_80b54e3efec8
     data: {}
   mode: single
 - id: '1586016368673'
@@ -583,15 +600,13 @@
     conditions:
     - condition: time
       after: '13:00'
-    - condition: device
-      type: is_on
-      device_id: df146928abbf585f8f032d2d32844a6f
-      entity_id: c287cfac34445b82c3056e9c55d57853
-      domain: switch
+    - condition: state
+      entity_id: switch.shelly1minig3_80b54e3efec8
+      state: 'on'
   actions:
   - action: light.turn_off
     target:
-      device_id: df146928abbf585f8f032d2d32844a6f
+      entity_id: light.2nd_landing_shelly1minig3_80b54e3efec8
     data: {}
   mode: single
 - id: '1586016875417'
@@ -611,11 +626,9 @@
       device_id: 204aaa3b09c64d020e0cd987db91f589
       entity_id: 45cbd75ece961f271cf330ed4a288ce0
       domain: switch
-    - condition: device
-      type: is_on
-      device_id: 601dce6a2b662fbaf4a98bde8e868320
-      entity_id: 79c3b243a355f0d5951eff26cba06b1b
-      domain: switch
+    - condition: state
+      entity_id: switch.shelly1minig3_d885ac060a64
+      state: 'on'
   actions:
   - action: light.turn_on
     data: {}
@@ -635,11 +648,9 @@
   conditions:
   - condition: and
     conditions:
-    - condition: device
-      type: is_off
-      device_id: 601dce6a2b662fbaf4a98bde8e868320
-      entity_id: 12201f94abfa157cb1d8e4359a677e31
-      domain: light
+    - condition: state
+      entity_id: light.1st_landing_shelly1minig3_d885ac060a64
+      state: 'off'
     - condition: device
       type: is_on
       device_id: 204aaa3b09c64d020e0cd987db91f589
@@ -651,7 +662,7 @@
   actions:
   - action: light.turn_on
     target:
-      device_id: 601dce6a2b662fbaf4a98bde8e868320
+      entity_id: light.1st_landing_shelly1minig3_d885ac060a64
     data: {}
   mode: single
 - id: '1586608671873'
@@ -770,16 +781,12 @@
   conditions:
   - condition: and
     conditions:
-    - condition: device
-      type: is_off
-      device_id: 601dce6a2b662fbaf4a98bde8e868320
-      entity_id: 79c3b243a355f0d5951eff26cba06b1b
-      domain: switch
-    - condition: device
-      type: is_on
-      device_id: df146928abbf585f8f032d2d32844a6f
-      entity_id: c287cfac34445b82c3056e9c55d57853
-      domain: switch
+    - condition: state
+      entity_id: switch.shelly1minig3_d885ac060a64
+      state: 'off'
+    - condition: state
+      entity_id: switch.shelly1minig3_80b54e3efec8
+      state: 'on'
   - condition: not
     conditions:
     - condition: state
@@ -791,7 +798,7 @@
   actions:
   - action: light.turn_on
     target:
-      device_id: 601dce6a2b662fbaf4a98bde8e868320
+      entity_id: light.1st_landing_shelly1minig3_d885ac060a64
     data: {}
   mode: single
 - id: '1596489565862'
@@ -890,13 +897,20 @@
       value_template: '{{ trigger.event.data.old_state.attributes[''friendly_name'']
         != ''Back Door Light'' }}'
   - condition: template
-    value_template: '{{ trigger.event.data.entity_id.split(''_'')[0] != ''living_room_lights_zha_group_0x0004''}}'
+    value_template: '{{ trigger.event.data.entity_id != "light.dresden_elektronik_conbee_ii_living_room_lights_zha_group_0x0004"
+      }}'
   - condition: template
-    value_template: '{{ trigger.event.data.entity_id.split(''_'')[0] != ''light.1st_landing_bulb_light_2''}}'
+    value_template: '{{ trigger.event.data.entity_id != "light.1st_landing_bulb_light_2"
+      }}'
   - condition: template
-    value_template: '{{ trigger.event.data.entity_id.split(''_'')[0] != ''light.2nd_landing_light''}}'
+    value_template: '{{ trigger.event.data.entity_id != "light.2nd_landing_light"
+      }}'
   - condition: template
-    value_template: '{{ trigger.event.data.entity_id.split(''_'')[0] != ''light.hallway_bulb_light''}}'
+    value_template: '{{ trigger.event.data.entity_id != "light.hallway_bulb_light"
+      }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.new_state.attributes.get("supported_color_modes",
+      []) != ["onoff"] }}'
   actions:
   - data_template:
       entity_id: '{{ trigger.event.data.entity_id }}'
@@ -920,20 +934,16 @@
   conditions:
   - condition: and
     conditions:
-    - condition: device
-      type: is_on
-      device_id: 601dce6a2b662fbaf4a98bde8e868320
-      entity_id: 79c3b243a355f0d5951eff26cba06b1b
-      domain: switch
-    - condition: device
-      type: is_off
-      device_id: df146928abbf585f8f032d2d32844a6f
-      entity_id: c287cfac34445b82c3056e9c55d57853
-      domain: switch
+    - condition: state
+      entity_id: switch.shelly1minig3_d885ac060a64
+      state: 'on'
+    - condition: state
+      entity_id: switch.shelly1minig3_80b54e3efec8
+      state: 'off'
   actions:
   - action: light.turn_on
     target:
-      device_id: df146928abbf585f8f032d2d32844a6f
+      entity_id: light.2nd_landing_shelly1minig3_80b54e3efec8
     data: {}
   mode: single
 - id: '1608710632187'
@@ -1117,17 +1127,15 @@
   conditions:
   - condition: and
     conditions:
-    - condition: device
-      type: is_on
-      device_id: df146928abbf585f8f032d2d32844a6f
-      entity_id: c287cfac34445b82c3056e9c55d57853
-      domain: switch
+    - condition: state
+      entity_id: switch.shelly1minig3_80b54e3efec8
+      state: 'on'
     - condition: time
       before: '11:00'
   actions:
   - action: light.turn_off
     target:
-      device_id: df146928abbf585f8f032d2d32844a6f
+      entity_id: light.2nd_landing_shelly1minig3_80b54e3efec8
     data: {}
   mode: single
 - id: '1640188248946'
@@ -1340,24 +1348,32 @@
   alias: Turn off Stairway Lights after 20 mins
   description: ''
   triggers:
-  - type: turned_on
-    device_id: 204aaa3b09c64d020e0cd987db91f589
-    entity_id: 45cbd75ece961f271cf330ed4a288ce0
-    domain: switch
-    trigger: device
-    id: Hall
-  - type: turned_on
-    device_id: 601dce6a2b662fbaf4a98bde8e868320
-    entity_id: 79c3b243a355f0d5951eff26cba06b1b
-    domain: switch
-    trigger: device
+  - trigger: state
+    entity_id: switch.shelly1minig3_d885ac060a64
+    to: 'on'
     id: 1st
-  - type: turned_on
-    device_id: df146928abbf585f8f032d2d32844a6f
-    entity_id: c287cfac34445b82c3056e9c55d57853
-    domain: switch
-    trigger: device
+    for:
+      hours: 0
+      minutes: 20
+      seconds: 0
+  - trigger: state
+    entity_id: switch.shelly1minig3_80b54e3efec8
+    to: 'on'
     id: 2nd
+    for:
+      hours: 0
+      minutes: 20
+      seconds: 0
+  - trigger: state
+    entity_id:
+    - switch.hallway_light_switch_switch_0
+    to:
+    - 'on'
+    for:
+      hours: 0
+      minutes: 20
+      seconds: 0
+    id: Hall
   conditions:
   - condition: time
     after: '20:01:00'
@@ -1385,19 +1401,17 @@
       id:
       - 1st
     then:
-    - type: turn_off
-      device_id: 601dce6a2b662fbaf4a98bde8e868320
-      entity_id: 12201f94abfa157cb1d8e4359a677e31
-      domain: light
+    - action: light.turn_off
+      target:
+        entity_id: light.1st_landing_shelly1minig3_d885ac060a64
   - if:
     - condition: trigger
       id:
       - 2nd
     then:
-    - type: turn_off
-      device_id: df146928abbf585f8f032d2d32844a6f
-      entity_id: e46810b3e0d32d1979c1f95e7ee3f5d7
-      domain: light
+    - action: light.turn_off
+      target:
+        entity_id: light.2nd_landing_shelly1minig3_80b54e3efec8
   mode: single
 - id: '1670178691016'
   alias: 'Doorbell: Sonos'
@@ -3101,27 +3115,6 @@
       notification_device: ee92bdbc2c73ff1a792c7d9547c78490
       notification_title: Certificate Renewed
       notification_message: hassio Let's Encrypt certificate renewed
-- id: '1752671614184'
-  alias: New automation
-  description: ''
-  triggers:
-  - trigger: webhook
-    allowed_methods:
-    - POST
-    - PUT
-    local_only: true
-    webhook_id: PPqqCpSheRAnjYVbviLMMtkf
-  conditions: []
-  actions:
-  - action: persistent_notification.create
-    metadata: {}
-    data:
-      message: ' {% if trigger.get(''data'') %}             Data: {{ trigger.data
-        | tojson }}           {% elif trigger.get(''json'') %}             JSON: {{
-        trigger.json | tojson }}           {% endif %}           {% if trigger.get(''query'')
-        and trigger.query | length > 0 %}             Query: {{ trigger.query | tojson
-        }}           {% endif %}'
-  mode: single
 - id: '1752672409794'
   alias: UniFi AI Face Alarm Trigger
   description: ''
@@ -3209,7 +3202,6 @@
   triggers:
   - trigger: state
     entity_id:
-    - binary_sensor.octopus_energy_a_038dd11d_octoplus_free_electricity_session
     - calendar.octopus_energy_a_038dd11d_octoplus_power_up
     from:
     - 'off'
@@ -3236,11 +3228,6 @@
   alias: Free Electricity - Turn off Immersion
   description: ''
   triggers:
-  - trigger: state
-    entity_id:
-    - binary_sensor.octopus_energy_a_038dd11d_octoplus_free_electricity_session
-    from: 'on'
-    to: 'off'
   - trigger: state
     entity_id:
     - calendar.octopus_energy_a_038dd11d_octoplus_power_up
@@ -4262,3 +4249,156 @@
       message: UDM Pro has been restarted on the schedule
       title: UDM Pro Restarted
   mode: single
+- id: '1786287645692'
+  alias: Cloud9 Subscription Renewal Reminders
+  description: Checks each Cloud9 subscription's renewal date daily and notifies 7
+    days before renewal.
+  triggers:
+  - at: 09:00:00
+    trigger: time
+  actions:
+  - variables:
+      subscriptions:
+      - date_entity: input_datetime.cloud9_adrian_renewal_date
+        name: Adrian
+      - date_entity: input_datetime.cloud9_jonathan_renewal_date
+        name: Jonathan
+      - date_entity: input_datetime.cloud9_sam_freddie_renewal_date
+        name: Sam & Freddie
+      - date_entity: input_datetime.cloud9_mark_renewal_date
+        name: Mark
+  - repeat:
+      for_each: '{{ subscriptions }}'
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{ states(repeat.item.date_entity) not in [''unknown'',''unavailable'']
+            and (as_datetime(states(repeat.item.date_entity)).date() - now().date()).days
+            == 7 }}'
+        then:
+        - action: notify.mobile_app_adrian_s26
+          data:
+            message: '{{ repeat.item.name }}''s Cloud9 subscription renews in 7 days
+              ({{ states(repeat.item.date_entity) }}).'
+            title: Cloud9 Renewal Due Soon
+        - action: notify.persistent_notification
+          data:
+            message: '{{ repeat.item.name }}''s Cloud9 subscription renews in 7 days
+              ({{ states(repeat.item.date_entity) }}).'
+            title: Cloud9 Renewal Due Soon
+  mode: single
+- id: '1786727156700'
+  alias: Living Room No Presence Shutdown
+  description: Turns off the TV, Sonos, and main lights in the living room when no
+    presence has been detected for 1 minute. Uses a stamped input_datetime instead
+    of a bare 'for:' so the 1-minute wait isn't reset by HA restarts or brief unavailable
+    blips.
+  triggers:
+  - entity_id: binary_sensor.everything_presence_one_289cf8_occupancy
+    from: 'on'
+    id: presence_cleared
+    to: 'off'
+    trigger: state
+  - id: check_timer
+    seconds: /15
+    trigger: time_pattern
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: presence_cleared
+      sequence:
+      - action: input_datetime.set_datetime
+        data:
+          datetime: '{{ now() }}'
+        note: Stamp the moment presence was lost.
+        target:
+          entity_id: input_datetime.living_room_presence_cleared
+    - conditions:
+      - condition: trigger
+        id: check_timer
+      - condition: state
+        entity_id: binary_sensor.everything_presence_one_289cf8_occupancy
+        state: 'off'
+      - condition: template
+        value_template: '{{ state_attr(''input_datetime.living_room_presence_cleared'',
+          ''timestamp'') is not none and (now().timestamp() - state_attr(''input_datetime.living_room_presence_cleared'',
+          ''timestamp'')) >= 60 and (now().timestamp() - state_attr(''input_datetime.living_room_presence_cleared'',
+          ''timestamp'')) < 75 }}'
+      sequence:
+      - action: media_player.turn_off
+        target:
+          entity_id:
+          - media_player.living_room_tv_4
+          - media_player.sonos_one
+      - action: light.turn_off
+        target:
+          entity_id:
+          - light.dresden_elektronik_conbee_ii_living_room_lights_zha_group_0x0004
+          - light.living_room_ceiling_light_switch
+  mode: single
+- id: '1787297916498'
+  alias: Set brightness by time - Landing & Hallway bulbs
+  description: Adjusts brightness by time of day for the 1st Landing, 2nd Landing,
+    and Hallway bulb lights only (split out from the whole-house brightness automation,
+    which explicitly excludes these three).
+  triggers:
+  - trigger: state
+    entity_id: light.1st_landing_bulb_light_2
+    from: 'off'
+    to: 'on'
+    id: 1st
+  - trigger: state
+    entity_id: light.2nd_landing_light
+    from: 'off'
+    to: 'on'
+    id: 2nd
+  - trigger: state
+    entity_id: light.hallway_bulb_light
+    from: 'off'
+    to: 'on'
+    id: hallway
+  conditions: []
+  actions:
+  - variables:
+      brightness_now: "{% set hour = now().hour %}{% set dayOfWeek = now().weekday()
+        %}{%- if hour >= 0 and hour < 7 and dayOfWeek in [0,1,2,3,4,5,6] -%}\n  15\n{%-
+        elif hour >= 7 and hour < 8 and dayOfWeek in [0,1,2,3,4,5,6] -%}\n  150\n{%-
+        elif hour >= 8 and hour < 22 and dayOfWeek in [0,1,2,3,4,5,6] -%}\n  255\n{%-
+        elif hour >= 22 and hour < 23 and dayOfWeek in [0,1,2,3,4,5,6] -%}\n  75\n{%-
+        elif hour >= 23 and hour < 24 and dayOfWeek in [0,1,2,3,4,5,6] -%}\n  15\n{%-
+        else -%}\n  1\n{%- endif %}"
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 1st
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id: light.1st_landing_bulb_light_2
+        data:
+          brightness: '{{ brightness_now }}'
+    - conditions:
+      - condition: trigger
+        id:
+        - 2nd
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id: light.2nd_landing_light
+        data:
+          brightness: '{{ brightness_now }}'
+    - conditions:
+      - condition: trigger
+        id:
+        - hallway
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id: light.hallway_bulb_light
+        data:
+          brightness: '{{ brightness_now }}'
+  mode: parallel
+  max: 3
