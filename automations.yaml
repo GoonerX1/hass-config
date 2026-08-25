@@ -231,22 +231,6 @@
   - service: script.1580666130293
     data: {}
   mode: single
-- id: '1580665959396'
-  alias: Turn on Kitchen Radio AM
-  description: ''
-  trigger:
-  - entity_id: media_player.bedroom_sonos
-    platform: state
-    to: playing
-  condition:
-  - after: 05:55:00
-    before: 06:30
-    condition: time
-  action:
-  - data: {}
-    entity_id: script.1581635745828
-    service: script.turn_on
-  mode: single
 - id: '1580666301543'
   alias: Turn on Kitchen Lights AM
   description: ''
@@ -362,40 +346,6 @@
   - data: {}
     entity_id: media_player.kitchen_sonos_sonos
     action: media_player.media_pause
-  mode: single
-- id: '1581362458095'
-  alias: Turn on lights when Adrian is home
-  description: ''
-  triggers:
-  - type: opened
-    device_id: 032e6037fba540ad8ee0d4423212ae9f
-    entity_id: binary_sensor.samjin_multi_ddd30701_ias_zone
-    domain: binary_sensor
-    trigger: device
-  conditions:
-  - condition: and
-    conditions:
-    - condition: state
-      entity_id: group.household
-      state: home
-    - below: '2'
-      condition: numeric_state
-      entity_id: sun.sun
-      value_template: '{{state.attributes.elevation}}'
-    - condition: device
-      type: is_off
-      device_id: a67dedf134ee2f4bbc2865fe5b237f69
-      entity_id: 471485bbf41dd72c6313a6c854f02b0a
-      domain: light
-  actions:
-  - action: light.turn_on
-    target:
-      device_id: 204aaa3b09c64d020e0cd987db91f589
-    data: {}
-  - data: {}
-    entity_id: script.1580666071205
-    enabled: false
-    action: script.turn_on
   mode: single
 - id: '1581611181917'
   alias: Certificate expiry hassio
@@ -738,39 +688,6 @@
     target:
       entity_id: cover.dining_venetian
   mode: single
-- id: '1593442153605'
-  alias: Turn on Bedroom Light
-  description: ''
-  triggers:
-  - type: turned_on
-    device_id: d8a5050da3b04ebabf51bf6441518d8c
-    entity_id: switch.trust_international_b_v_zll_noncolorcontroller_395b8e03_on_off
-    domain: switch
-    trigger: device
-  conditions: []
-  actions:
-  - action: switch.turn_on
-    metadata: {}
-    data: {}
-    target:
-      device_id: c71c404ab4bca5763814058953e7cecf
-  mode: single
-- id: '1593442270420'
-  alias: Turn off Bedroom Light
-  description: ''
-  triggers:
-  - device_id: d8a5050da3b04ebabf51bf6441518d8c
-    domain: switch
-    entity_id: switch.trust_international_b_v_zll_noncolorcontroller_395b8e03_on_off
-    type: turned_off
-    trigger: device
-  conditions: []
-  actions:
-  - action: switch.turn_off
-    metadata: {}
-    data: {}
-    target:
-      device_id: c71c404ab4bca5763814058953e7cecf
 - id: '1594049810396'
   alias: Turn on 1st landing light 2nd stairway motion
   description: ''
@@ -1984,37 +1901,6 @@
     target:
       entity_id: switch.garage_light_switch_2
     action: switch.turn_on
-  mode: single
-- id: '1709918266695'
-  alias: Weather
-  description: ''
-  triggers:
-  - command:
-    - What's the weather forecast
-    - What's the weather
-    trigger: conversation
-  conditions: []
-  actions:
-  - target:
-      entity_id:
-      - weather.openweathermap
-    data:
-      type: hourly
-    response_variable: forecast
-    action: weather.get_forecasts
-  - data:
-      cache: true
-      media_player_entity_id: media_player.bedroom_sonos, media_player.k
-      message: '{% set next = forecast[0] %}
-
-        The forecast for today is
-
-        {{ next.temperature}} degrees and {{ next.condition }} with a
-
-        {{ next.precipitation_probability }} percent chance of precipitation.'
-    action: tts.speak
-    target:
-      entity_id: tts.home_assistant_cloud
   mode: single
 - id: '1710875499894'
   alias: Notify Zones
@@ -4402,3 +4288,162 @@
           brightness: '{{ brightness_now }}'
   mode: parallel
   max: 3
+- id: '1787564556896'
+  alias: Zigbee Device Offline/Online Alert
+  description: Pushes a notification (phone + HA persistent notification) when a ZHA
+    Zigbee device drops off the network for 15+ minutes, and again when it reconnects.
+    Covers 20 ZHA devices (excludes the ZBT-2 coordinator/group entity, and 4 wall-switch-powered
+    bulbs — Hallway Bulb, 1st Landing bulb, 2nd Landing Light, Bedroom Ceiling Light
+    — which read as unavailable whenever their wall switch is off, so that state doesn't
+    indicate a real Zigbee problem). Add new Zigbee devices' entities here as they're
+    paired. The companion 'Zigbee Daily Connectivity Summary' automation recomputes
+    its own device list dynamically each morning.
+  triggers:
+  - note: Fires once a ZHA device entity has stayed unavailable for 15 continuous
+      minutes.
+    trigger: state
+    entity_id:
+    - binary_sensor.samjin_motion_abad0801_ias_zone
+    - binary_sensor.samjin_multi_102c1301_ias_zone
+    - binary_sensor.samjin_multi_ddd30701_ias_zone
+    - binary_sensor.bathroom_door_ias_zone
+    - binary_sensor.ewelink_ds01_3b174524_ias_zone
+    - binary_sensor.back_door_iaszone
+    - binary_sensor.door_opening
+    - binary_sensor.outdoor_sensor
+    - binary_sensor.garden_light_motion_sensor_occupancy
+    - button.sengled_z01_a60eae27_b62f0403_identify
+    - button.breakfast_bar_identify
+    - button.lumi_lumi_switch_l1aeu1_identify
+    - button.lumi_lumi_switch_l1aeu1_8e883600_identify
+    - button.lumi_lumi_switch_l1aeu1_53723600_identify
+    - button.lumi_lumi_switch_l1aeu1_identifybutton
+    - button.lumi_lumi_switch_l1aeu1_identify_2
+    - button.garage_light_identify
+    - button.signify_netherlands_b_v_lwe007_identify
+    - light.kitchen_light_switch_light
+    to:
+    - unavailable
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+    id: went_offline
+  - note: Fires once a previously-offline device has held a non-unavailable state
+      for 2 minutes, to avoid alerting on brief flaps.
+    trigger: state
+    entity_id:
+    - binary_sensor.samjin_motion_abad0801_ias_zone
+    - binary_sensor.samjin_multi_102c1301_ias_zone
+    - binary_sensor.samjin_multi_ddd30701_ias_zone
+    - binary_sensor.bathroom_door_ias_zone
+    - binary_sensor.ewelink_ds01_3b174524_ias_zone
+    - binary_sensor.back_door_iaszone
+    - binary_sensor.door_opening
+    - binary_sensor.outdoor_sensor
+    - binary_sensor.garden_light_motion_sensor_occupancy
+    - button.sengled_z01_a60eae27_b62f0403_identify
+    - button.breakfast_bar_identify
+    - button.lumi_lumi_switch_l1aeu1_identify
+    - button.lumi_lumi_switch_l1aeu1_8e883600_identify
+    - button.lumi_lumi_switch_l1aeu1_53723600_identify
+    - button.lumi_lumi_switch_l1aeu1_identifybutton
+    - button.lumi_lumi_switch_l1aeu1_identify_2
+    - button.garage_light_identify
+    - button.signify_netherlands_b_v_lwe007_identify
+    - light.kitchen_light_switch_light
+    from:
+    - unavailable
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: came_online
+  conditions: []
+  actions:
+  - variables:
+      device_name: '{% set did = device_id(trigger.entity_id) %}{{ device_attr(did,''name_by_user'')
+        or device_attr(did,''name'') or trigger.to_state.name }}'
+    note: Resolve the underlying ZHA device's friendly name rather than the triggering
+      entity's (which may be a diagnostic 'Identify' button).
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: went_offline
+      sequence:
+      - action: notify.adrian_mobile
+        data:
+          title: ⚠️ Zigbee device offline
+          message: '{{ device_name }} has dropped off the Zigbee network (unavailable
+            15+ min).'
+      - action: persistent_notification.create
+        data:
+          title: Zigbee device offline
+          message: '{{ device_name }} has dropped off the Zigbee network (unavailable
+            15+ min).'
+          notification_id: zigbee_offline_{{ trigger.entity_id }}
+    - conditions:
+      - condition: trigger
+        id: came_online
+      sequence:
+      - action: notify.adrian_mobile
+        data:
+          title: ✅ Zigbee device back online
+          message: '{{ device_name }} has reconnected to the Zigbee network.'
+      - action: persistent_notification.dismiss
+        data:
+          notification_id: zigbee_offline_{{ trigger.entity_id }}
+  mode: parallel
+  max: 30
+- id: '1787564582434'
+  alias: Zigbee Daily Connectivity Summary
+  description: Every morning at 08:00, checks ZHA Zigbee devices (excluding the ZBT-2
+    coordinator/group entity and 4 wall-switch-powered bulbs — Hallway Bulb, 1st Landing
+    bulb, 2nd Landing Light, Bedroom Ceiling Light — which read as unavailable whenever
+    their wall switch is off) and pushes a summary of any that are genuinely offline,
+    plus a persistent notification in HA. Uses integration_entities('zha') so the
+    device list is self-maintaining as devices are added or removed.
+  triggers:
+  - trigger: time
+    at: 08:00:00
+    note: Daily morning check — self-healing backstop in case any device was missed
+      by the real-time alert automation's entity list.
+  conditions: []
+  actions:
+  - variables:
+      zha_status: '{% set ns = namespace(seen=[], offline=[], total=0) %}{% for e
+        in integration_entities(''zha'') %}{% set did = device_id(e) %}{% if did and
+        did not in ns.seen and ''_zha_group_'' not in e %}{% set dname = device_attr(did,''name_by_user'')
+        or device_attr(did,''name'') %}{% if dname and ''ZBT-2'' not in dname and
+        ''Conbee'' not in dname and ''SkyConnect'' not in dname and ''Hallway Bulb''
+        not in dname and ''1st Landing bulb'' not in dname and ''2nd Landing Light''
+        not in dname and ''Bedroom Ceiling Light'' not in dname %}{% set ns.seen =
+        ns.seen + [did] %}{% set ns.total = ns.total + 1 %}{% if states(e) == ''unavailable''
+        %}{% set ns.offline = ns.offline + [dname] %}{% endif %}{% endif %}{% endif
+        %}{% endfor %}{{ {''total'': ns.total, ''offline'': ns.offline} }}'
+    note: Groups ZHA entities by device, counts total monitored devices, and lists
+      which are currently unavailable.
+  - if:
+    - condition: template
+      value_template: '{{ zha_status.offline | length > 0 }}'
+    then:
+    - action: notify.adrian_mobile
+      data:
+        title: '⚠️ Zigbee daily check: {{ zha_status.offline | length }} offline'
+        message: 'Offline: {{ zha_status.offline | join('', '') }} ({{ zha_status.total
+          - zha_status.offline | length }}/{{ zha_status.total }} devices online).'
+    - action: persistent_notification.create
+      data:
+        title: 'Zigbee daily check: devices offline'
+        message: 'Offline: {{ zha_status.offline | join('', '') }} ({{ zha_status.total
+          - zha_status.offline | length }}/{{ zha_status.total }} devices online).'
+        notification_id: zigbee_daily_summary
+    else:
+    - action: notify.adrian_mobile
+      data:
+        title: ✅ Zigbee daily check
+        message: All {{ zha_status.total }} Zigbee devices are online.
+    - action: persistent_notification.dismiss
+      data:
+        notification_id: zigbee_daily_summary
+  mode: single
