@@ -2443,7 +2443,8 @@
   mode: single
 - id: '1738342111121'
   alias: 'Heating: Proximity Set Temperature'
-  description: ''
+  description: Pre-heat when arriving home (cold-weather evenings only, not in meteorological
+    summer); switch to away preset when everyone leaves.
   triggers:
   - trigger: numeric_state
     entity_id:
@@ -2490,31 +2491,22 @@
           - condition: state
             entity_id: sensor.home_nearest_direction_of_travel
             state: arrived
+        - condition: state
+          entity_id: sensor.season_metrological_2
+          state:
+          - spring
+          - autumn
+          - winter
+          note: 'Added 2026-08-29: never pre-heat during meteorological summer, regardless
+            of the outdoor-temp condition above.'
       sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.turn_on_heating
+        data: {}
       - action: climate.set_preset_mode
         data:
           preset_mode: home
-        enabled: false
-        target:
-          device_id:
-          - 42e6b67cb99dcd916c6f867e25f810f5
-          - b9e116145912afbd853c3d85a4943b9e
-          - f952ed40cb87c1b890d54b8700725f7e
-          - c988fe763d856ade45de5b034e6d2912
-          - 7247697def1e8cc3c0c3ebcb5caea21e
-          - 919624c4c3a7d41cdc47ea5e8a3ae80e
-      - action: notify.adrian_mobile
-        data:
-          message: Location state changed to {{ trigger.to_state.state }} for person.{{trigger.to_state.object_id}}
-        enabled: false
-      - action: input_boolean.turn_on
-        metadata: {}
-        data: {}
-        target:
-          entity_id: input_boolean.turn_on_heating
-        enabled: true
-      - action: climate.set_temperature
-        metadata: {}
         target:
           entity_id:
           - climate.bedroom_1
@@ -2523,10 +2515,8 @@
           - climate.bedroom_4
           - climate.kitchen
           - climate.living_room
-        data:
-          temperature: '{{ state_sttr(''schedule.main_climate_schedule'',''temp'')
-            | float(0) }}'
-        enabled: false
+        note: 'Fixed 2026-08-29: was disabled with a broken state_sttr typo; now resumes
+          the zone schedule on arrival instead of doing nothing.'
     - conditions:
       - condition: trigger
         id:
@@ -2535,25 +2525,20 @@
       - action: climate.set_preset_mode
         data:
           preset_mode: away
-        enabled: true
         target:
-          device_id:
-          - 42e6b67cb99dcd916c6f867e25f810f5
-          - b9e116145912afbd853c3d85a4943b9e
-          - f952ed40cb87c1b890d54b8700725f7e
-          - c988fe763d856ade45de5b034e6d2912
-          - 7247697def1e8cc3c0c3ebcb5caea21e
-          - 919624c4c3a7d41cdc47ea5e8a3ae80e
-      - action: notify.adrian_mobile
-        data:
-          message: Location state changed to {{ trigger.to_state.state }} for person.{{trigger.to_state.object_id}}
-        enabled: false
+          entity_id:
+          - climate.bedroom_1
+          - climate.bedroom_2
+          - climate.bedroom_3
+          - climate.bedroom_4
+          - climate.kitchen
+          - climate.living_room
+        note: Switched from device_id to entity_id targets per best practice.
       - action: input_boolean.turn_off
-        metadata: {}
-        data: {}
         target:
           entity_id:
           - input_boolean.turn_on_heating
+        data: {}
   mode: single
 - id: '1742292813251'
   alias: Restart Protect Devices when offline
@@ -4306,7 +4291,6 @@
     - binary_sensor.samjin_motion_abad0801_ias_zone
     - binary_sensor.samjin_multi_102c1301_ias_zone
     - binary_sensor.samjin_multi_ddd30701_ias_zone
-    - binary_sensor.bathroom_door_ias_zone
     - binary_sensor.ewelink_ds01_3b174524_ias_zone
     - binary_sensor.back_door_iaszone
     - binary_sensor.door_opening
@@ -4336,7 +4320,6 @@
     - binary_sensor.samjin_motion_abad0801_ias_zone
     - binary_sensor.samjin_multi_102c1301_ias_zone
     - binary_sensor.samjin_multi_ddd30701_ias_zone
-    - binary_sensor.bathroom_door_ias_zone
     - binary_sensor.ewelink_ds01_3b174524_ias_zone
     - binary_sensor.back_door_iaszone
     - binary_sensor.door_opening
@@ -4446,4 +4429,158 @@
     - action: persistent_notification.dismiss
       data:
         notification_id: zigbee_daily_summary
+  mode: single
+- id: '1787752669236'
+  alias: PlayStation Network Error Alert
+  description: 'Notify Adrian about integration/auth failures: (1) PlayStation Network''s
+    repeating auth-refresh crash or 10+min unavailability, (2) Microsoft 365 (calendar/mail/to-do/teams)
+    failing to refresh its OAuth token (invalid_client), and (3) HA''s ''Login attempt
+    failed / invalid authentication'' notification. Throttled to at most one alert
+    per hour so repeating error loops don''t spam notifications.'
+  triggers:
+  - trigger: event
+    event_type: system_log_event
+    event_data:
+      name: homeassistant.components.playstation_network.coordinator
+      level: ERROR
+    id: log_error
+  - trigger: state
+    entity_id: sensor.the_ps_gooner_online_status
+    to: unavailable
+    for:
+      minutes: 10
+    id: went_unavailable
+  - trigger: event
+    event_type: system_log_event
+    event_data:
+      name: custom_components.ms365_calendar.integration.coordinator_integration
+      level: ERROR
+    id: ms365_error
+  - trigger: event
+    event_type: system_log_event
+    event_data:
+      name: custom_components.ms365_mail.integration.coordinator_integration
+      level: ERROR
+    id: ms365_error
+  - trigger: event
+    event_type: system_log_event
+    event_data:
+      name: custom_components.ms365_todo.integration.coordinator_integration
+      level: ERROR
+    id: ms365_error
+  - trigger: event
+    event_type: system_log_event
+    event_data:
+      name: custom_components.ms365_teams.integration.coordinator_integration
+      level: ERROR
+    id: ms365_error
+  - trigger: persistent_notification
+    update_type:
+    - added
+    notification_id: http-login
+    id: login_failed
+  conditions:
+  - condition: template
+    value_template: '{{ state_attr(''automation.playstation_network_error_alert'',
+      ''last_triggered'') is none or (now() - state_attr(''automation.playstation_network_error_alert'',
+      ''last_triggered'')).total_seconds() > 3600 }}'
+    note: 'Throttle: only notify once per hour per failure type while an error keeps
+      repeating, using this automation''s own last_triggered instead of a separate
+      helper.'
+  actions:
+  - action: notify.adrian_mobile
+    data:
+      title: '{% if trigger.id in [''log_error'', ''went_unavailable''] %}PlayStation
+        Network integration failing{% elif trigger.id == ''ms365_error'' %}Microsoft
+        365 integration failing{% else %}HA login attempt failed{% endif %}'
+      message: '{% if trigger.id == ''log_error'' %}HA''s PlayStation Network integration
+        keeps failing to refresh its login token (AttributeError in psnawp_api) —
+        it''s been repeating since yesterday. Reconfigure it in Settings > Devices
+        & Services.{% elif trigger.id == ''went_unavailable'' %}Your PlayStation Network
+        sensors have been unavailable for 10+ minutes — the integration has likely
+        failed to authenticate. Check Settings > Devices & Services > PlayStation
+        Network.{% elif trigger.id == ''ms365_error'' %}Your Microsoft 365 integration
+        (calendar/mail/to-do/teams) can''t refresh its login token (invalid_client)
+        and has been failing repeatedly. It likely needs reauthenticating — go to
+        Settings > Devices & Services > Microsoft 365 and reconfigure.{% else %}HA
+        logged a failed login/API request with invalid authentication from localhost
+        (127.0.0.1) — likely arriving through the NGINX proxy without the real client
+        IP visible. Check the log for details.{% endif %}'
+  mode: single
+- id: '1787915513694'
+  alias: 'UPS: Shut down Proxmox & Diskstation on low battery + mains loss'
+  description: Cleanly shuts down the Proxmox host pve03 when the Eaton 3S UPS battery
+    drops below 10% while either running on battery (mains lost) or not charging,
+    to avoid an unclean power-loss shutdown.
+  triggers:
+  - trigger: numeric_state
+    entity_id: sensor.eaton_3s_battery_charge
+    below: 10
+    id: battery_low
+    note: Fires the moment battery charge crosses below 10%.
+  - trigger: state
+    entity_id: sensor.eaton_3s_status_data
+    id: status_changed
+    note: Also re-check whenever the UPS status flags change (e.g. mains lost) while
+      battery is already below 10%.
+  conditions:
+  - condition: numeric_state
+    entity_id: sensor.eaton_3s_battery_charge
+    below: 10
+    note: Battery charge below 10%.
+  - condition: template
+    value_template: '{{ ''OL'' not in states(''sensor.eaton_3s_status_data'').split()
+      or ''CHRG'' not in states(''sensor.eaton_3s_status_data'').split() }}'
+    note: 'NUT reports space-separated status flags (e.g. ''OL CHRG''). ''OL'' absent
+      means mains/on-line power is not connected; ''CHRG'' absent means the battery
+      is not charging. No native condition can tokenize a composite status string,
+      so this is templated per template-guidelines.md #7 (complex conditional state).'
+  actions:
+  - action: button.press
+    target:
+      entity_id: button.pve03_shut_down
+    note: Proxmox VE integration's node shutdown button for pve03.
+    data: {}
+  - action: button.press
+    metadata: {}
+    target:
+      entity_id: button.diskstation_shutdown
+    data: {}
+  mode: single
+- id: '1788004607298'
+  alias: 'Heating: Seasonal Central Mode'
+  description: 'Keeps VTherm''s Central Mode aligned with the meteorological season:
+    Frost protection only through summer (no comfort/eco/boost heating call-outs),
+    Auto the rest of the year. Re-syncs on HA restart too, in case Central Mode was
+    left in a manual state.'
+  triggers:
+  - trigger: state
+    entity_id: sensor.season_metrological_2
+    id: SeasonChanged
+  - trigger: homeassistant
+    event: start
+    id: Startup
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.season_metrological_2
+        state: summer
+      sequence:
+      - action: select.select_option
+        target:
+          entity_id: select.central_mode
+        data:
+          option: Frost protection
+        note: 'Summer: block normal heating house-wide but keep frost protection as
+          a safety net.'
+    default:
+    - action: select.select_option
+      target:
+        entity_id: select.central_mode
+      data:
+        option: Auto
+      note: 'Spring/Autumn/Winter: let each VTherm''s own presets/schedule/presence
+        logic run normally.'
   mode: single
