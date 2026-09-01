@@ -1,6 +1,6 @@
 #person.adrian_chapman:
-  #entity_picture: /local/AdrianChapman.png
-sensor.season:
+#entity_picture: /local/AdrianChapman.png
+sensor.season_astronomical:
   templates:
     friendly_name_template: return state
     icon: >
