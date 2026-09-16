@@ -79,8 +79,10 @@ device_tracker:
   #  - platform: bluetooth_tracker
   - platform: bluetooth_le_tracker
     track_battery: true
-    track_new_devices: false
+    track_new_devices: true
     interval_seconds: 30
+    track_battery_interval:
+      days: 1
 input_boolean:
   night_mode:
     name: "Night Mode"

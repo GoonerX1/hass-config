@@ -157,15 +157,15 @@
   - action: climate.set_preset_mode
     metadata: {}
     target:
-      device_id:
-      - c988fe763d856ade45de5b034e6d2912
-      - 7247697def1e8cc3c0c3ebcb5caea21e
-      - b9e116145912afbd853c3d85a4943b9e
-      - f952ed40cb87c1b890d54b8700725f7e
-      - 919624c4c3a7d41cdc47ea5e8a3ae80e
-      - 42e6b67cb99dcd916c6f867e25f810f5
+      entity_id:
+      - climate.vtherm_bedroom_1
+      - climate.vtherm_bedroom_2
+      - climate.vtherm_bedroom_3
+      - climate.vtherm_bedroom_4
+      - climate.vtherm_kitchen
+      - climate.vtherm_living_room
     data:
-      preset_mode: away
+      preset_mode: none
   mode: single
 - id: '1580662467114'
   alias: Arm items Home
@@ -194,16 +194,16 @@
     data: {}
   - action: climate.set_preset_mode
     metadata: {}
-    target:
-      device_id:
-      - c988fe763d856ade45de5b034e6d2912
-      - 7247697def1e8cc3c0c3ebcb5caea21e
-      - b9e116145912afbd853c3d85a4943b9e
-      - f952ed40cb87c1b890d54b8700725f7e
-      - 919624c4c3a7d41cdc47ea5e8a3ae80e
-      - 42e6b67cb99dcd916c6f867e25f810f5
     data:
-      preset_mode: home
+      preset_mode: comfort
+    target:
+      entity_id:
+      - climate.vtherm_bedroom_1
+      - climate.vtherm_bedroom_2
+      - climate.vtherm_bedroom_3
+      - climate.vtherm_bedroom_4
+      - climate.vtherm_kitchen
+      - climate.vtherm_living_room
   mode: single
 - id: '1580663686647'
   alias: Blink Image Update
@@ -1340,10 +1340,11 @@
     domain: binary_sensor
     trigger: device
     id: doorbell
-  - device_id: dba216959c8b59ae455371ed46ff0002
-    domain: media_player
-    entity_id: 557dfe696b876dee248a5ef1347d6cb8
-    type: turned_on
+    enabled: false
+  - type: turned_on
+    device_id: dba216959c8b59ae455371ed46ff0002
+    entity_id: 82711510ec9aca271a86749af0dcd7fb
+    domain: switch
     trigger: device
     id: package
   - trigger: event.received
@@ -2680,8 +2681,13 @@
     metadata: {}
     data: {}
     target:
-      label_id:
-      - homekit
+      entity_id:
+      - climate.vtherm_bedroom_1
+      - climate.vtherm_bedroom_2
+      - climate.vtherm_bedroom_3
+      - climate.vtherm_bedroom_4
+      - climate.vtherm_kitchen
+      - climate.vtherm_living_room
   - delay:
       hours: 0
       minutes: 1
@@ -2693,24 +2699,24 @@
       temperature: 21
     target:
       entity_id:
-      - climate.living_room
-      - climate.bedroom_2
+      - climate.vtherm_living_room
+      - climate.vtherm_bedroom_2
   - action: climate.set_temperature
     metadata: {}
     data:
       temperature: 21
     target:
       entity_id:
-      - climate.bedroom_1
-      - climate.kitchen
+      - climate.vtherm_bedroom_1
+      - climate.vtherm_kitchen
   - action: climate.set_temperature
     metadata: {}
     data:
       temperature: 21
     target:
       entity_id:
-      - climate.bedroom_3
-      - climate.bedroom_4
+      - climate.vtherm_bedroom_3
+      - climate.vtherm_bedroom_4
   mode: single
 - id: '1743784171014'
   alias: 'Heating: Turn Off'
@@ -4548,11 +4554,15 @@
     data: {}
   mode: single
 - id: '1788004607298'
-  alias: 'Heating: Seasonal Central Mode'
-  description: 'Keeps VTherm''s Central Mode aligned with the meteorological season:
-    Frost protection only through summer (no comfort/eco/boost heating call-outs),
-    Auto the rest of the year. Re-syncs on HA restart too, in case Central Mode was
-    left in a manual state.'
+  alias: 'Heating: Central Mode Schedule'
+  description: Keeps VTherm's Central Mode aligned with season, time of day, and outdoor
+    temperature. Comfort/eco/boost heating is only allowed between 14:00-22:00 when
+    Garden Temperature is below 13C, and only outside summer. At all other times (before
+    14:00, at/after 22:00, garden 13C or warmer, or summer) Central Mode drops to
+    Frost protection - individual VTherm thermostats still float freely, but comfort
+    call-outs are blocked and only the 7C frost floor remains active, so pipes stay
+    protected. Re-syncs on HA restart too, in case Central Mode was left in a manual
+    state.
   triggers:
   - trigger: state
     entity_id: sensor.season_metrological_2
@@ -4560,8 +4570,39 @@
   - trigger: homeassistant
     event: start
     id: Startup
+  - trigger: time
+    at: '14:00:00'
+    id: WindowOpens
+  - trigger: time
+    at: '22:00:00'
+    id: WindowCloses
+  - trigger: numeric_state
+    entity_id: sensor.garden_temperature
+    below: 13
+    id: GardenColdEnough
+  - trigger: numeric_state
+    entity_id: sensor.garden_temperature
+    above: 13
+    id: GardenTooWarm
   conditions: []
   actions:
+  - if:
+    - condition: trigger
+      id: Startup
+    then:
+    - action: climate.set_hvac_mode
+      target:
+        entity_id:
+        - climate.vtherm_living_room
+        - climate.vtherm_kitchen
+        - climate.vtherm_bedroom_1
+        - climate.vtherm_bedroom_2
+        - climate.vtherm_bedroom_3
+        - climate.vtherm_bedroom_4
+      data:
+        hvac_mode: 'off'
+      note: Force all VTherm thermostats off immediately on HA restart, before they
+        can restore their pre-restart HVAC mode and briefly call for heat.
   - choose:
     - conditions:
       - condition: state
@@ -4575,12 +4616,121 @@
           option: Frost protection
         note: 'Summer: block normal heating house-wide but keep frost protection as
           a safety net.'
+    - conditions:
+      - condition: time
+        after: '14:00:00'
+        before: '22:00:00'
+      - condition: numeric_state
+        entity_id: sensor.garden_temperature
+        below: 13
+      sequence:
+      - action: select.select_option
+        target:
+          entity_id: select.central_mode
+        data:
+          option: Auto
+        note: 'Within the 14:00-22:00 daily window and garden colder than 13C: allow
+          normal presence/preset-driven heating.'
     default:
     - action: select.select_option
       target:
         entity_id: select.central_mode
       data:
-        option: Auto
-      note: 'Spring/Autumn/Winter: let each VTherm''s own presets/schedule/presence
-        logic run normally.'
+        option: Frost protection
+      note: 'Before 14:00, at/after 22:00, or garden 13C or warmer: no comfort heating,
+        frost floor only.'
   mode: single
+- id: '1788276198429'
+  alias: Update Travel Times
+  description: ''
+  triggers:
+  - trigger: time
+    at: 07:45:00
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+  - trigger: time
+    at: '16:25:00'
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+  conditions: []
+  actions:
+  - action: homeassistant.update_entity
+    data:
+      entity_id:
+      - sensor.travel_adrian_time_to_home_google_travel_time
+      - sensor.travel_adrian_time_to_work_google_travel_time
+      - sensor.travel_hannah_time_to_work_google_travel_time
+      - sensor.travel_hannah_time_to_home
+  mode: single
+- id: '1788600623927'
+  alias: 'Voice: Play radio station in this room'
+  description: 'Sentence-triggered: plays a Music Assistant radio station, by name,
+    on the Sonos speaker in whichever room the voice satellite that heard the request
+    is located in.'
+  triggers:
+  - command:
+    - play {station} radio
+    - play {station} on the radio
+    - put {station} radio on
+    - put on {station} radio
+    - play {station} on the speaker
+    trigger: conversation
+  actions:
+  - note: Maps the requesting voice satellite's area_id to the Music Assistant player
+      entity for the Sonos/Denon speaker in that room. Add new rooms here as speakers
+      are added.
+    variables:
+      power_entity: '{% set pmap = {''6aaf5c95bc6d43e384e05551ea13ccac'': ''media_player.office''}
+        %}{{ pmap.get(room_area_id, '''') }}'
+      room_area_id: '{{ area_id(trigger.device_id) if trigger.device_id else none
+        }}'
+      target_player: '{% set map = {''5d00ceeee04c4e43a02bb77e7d6435c3'': ''media_player.kitchen_4'',
+        ''78a330ec08974b448c83c7339c6b2018'': ''media_player.living_room_3'', ''d18184dcecde4674b20e659605dec5e6'':
+        ''media_player.bedroom_sonos_3'', ''6aaf5c95bc6d43e384e05551ea13ccac'': ''media_player.office_3''}
+        %}{{ map.get(room_area_id, '''') }}'
+      station_name: '{{ trigger.slots.station if trigger.slots is defined and trigger.slots.station
+        is defined else '''' }}'
+  - else:
+    - if:
+      - condition: template
+        value_template: '{{ power_entity != '''' }}'
+      then:
+      - action: media_player.turn_on
+        note: Wake the Denon AVR before playback; it does not auto-power-on for Music
+          Assistant like the Sonos speakers do.
+        target:
+          entity_id: '{{ power_entity }}'
+      - delay:
+          seconds: 4
+        note: Give the AVR a few seconds to finish powering up before switching input.
+      - action: media_player.select_source
+        data:
+          source: NET
+        note: NET is the Denon's network-streaming input that Music Assistant plays
+          through.
+        target:
+          entity_id: '{{ power_entity }}'
+    - action: music_assistant.play_media
+      data:
+        media_id: '{{ station_name }}'
+        media_type: radio
+      note: media_id is the spoken station name; Music Assistant searches the library/providers
+        for the best radio match.
+      target:
+        entity_id: '{{ target_player }}'
+    - set_conversation_response: Playing {{ station_name }} radio in here.
+    if:
+    - condition: template
+      value_template: '{{ target_player == '''' }}'
+    then:
+    - set_conversation_response: There's no speaker set up in this room yet.
+  max: 5
+  mode: queued
