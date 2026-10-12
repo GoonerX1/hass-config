@@ -28,13 +28,15 @@
     enabled: false
   - trigger: occupancy.detected
     target:
-      device_id: efb5e625c084fcfa7b1459d3bd7c515b
+      entity_id: binary_sensor.everything_presence_lite_9609d8_zone_1_occupancy
     options:
       behavior: first
+    note: Zone 1 only, so movement outside the hallway polygon (behind doors) is ignored.
   conditions:
   - condition: state
-    entity_id: input_boolean.its_dark
-    state: 'on'
+    entity_id: input_boolean.its_dark_inside
+    state:
+    - 'on'
   - condition: device
     type: is_off
     device_id: 204aaa3b09c64d020e0cd987db91f589
@@ -61,7 +63,7 @@
     trigger: device
   conditions:
   - condition: state
-    entity_id: input_boolean.its_dark
+    entity_id: input_boolean.its_dark_inside
     state: 'on'
   actions:
   - action: light.turn_on
@@ -174,7 +176,7 @@
   - entity_id: group.household
     to: home
     trigger: state
-    enabled: false
+    enabled: true
   - trigger: numeric_state
     entity_id:
     - zone.home
@@ -245,7 +247,7 @@
     entity_id: person.adrian_chapman
     state: home
   - condition: state
-    entity_id: input_boolean.its_dark
+    entity_id: input_boolean.its_dark_inside
     state: 'on'
   actions:
   - data: {}
@@ -295,13 +297,14 @@
     enabled: false
   - trigger: occupancy.cleared
     target:
-      device_id: efb5e625c084fcfa7b1459d3bd7c515b
+      entity_id: binary_sensor.everything_presence_lite_9609d8_zone_1_occupancy
     options:
       behavior: all
       for:
         hours: 0
         minutes: 0
         seconds: 10
+    note: Zone 1 only, matching the turn-on automation.
   conditions:
   - condition: or
     conditions:
@@ -419,7 +422,7 @@
     before: 00:00:00
     condition: time
   - condition: state
-    entity_id: input_boolean.its_dark
+    entity_id: input_boolean.its_dark_inside
     state:
     - 'on'
   actions:
@@ -443,13 +446,14 @@
     trigger: device
   conditions:
   - condition: state
-    entity_id: input_boolean.its_dark
+    entity_id: input_boolean.its_dark_inside
     state:
     - 'on'
   actions:
   - data: {}
     target:
-      device_id: 7c026c8c9726b611dd65ab57a9cf7c8e
+      entity_id: light.utility_light_switch
+      area_id: 022326a754df41a38696240e6925bd06
     action: light.turn_on
   mode: single
 - id: '1583001449358'
@@ -515,7 +519,7 @@
     entity_id: switch.shelly1minig3_80b54e3efec8
     state: 'off'
   - condition: state
-    entity_id: input_boolean.its_dark
+    entity_id: input_boolean.its_dark_inside
     state: 'on'
   actions:
   - action: light.turn_on
@@ -607,7 +611,7 @@
       entity_id: 45cbd75ece961f271cf330ed4a288ce0
       domain: switch
     - condition: state
-      entity_id: input_boolean.its_dark
+      entity_id: input_boolean.its_dark_inside
       state: 'on'
   actions:
   - action: light.turn_on
@@ -630,7 +634,7 @@
   triggers:
   - trigger: state
     entity_id:
-    - input_boolean.its_dark
+    - input_boolean.its_dark_inside
     from:
     to:
     - 'on'
@@ -645,9 +649,11 @@
   - data: {}
     action: cover.close_cover
     target:
-      floor_id:
-      - 1st_floor
-      - ground
+      entity_id:
+      - cover.rfy_010101_1
+      - cover.rfy_010102_2
+      - cover.rfy_010103_1
+      - cover.dining_venetian
   mode: single
 - id: '1591810014680'
   alias: 'Blinds: Open AM Weekdays'
@@ -780,67 +786,6 @@
     entity_id: input_boolean.night_mode
     action: input_boolean.turn_off
   mode: single
-- id: '1600620647999'
-  alias: detect lights and adjust the brightness when turned on based on time
-  triggers:
-  - event_type: state_changed
-    trigger: event
-  conditions:
-  - condition: and
-    conditions:
-    - condition: template
-      value_template: '{{ trigger.event.data is not none }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.entity_id is not none }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.entity_id.split(''.'')[0] == ''light''}}'
-    - condition: template
-      value_template: '{{ trigger.event.data.old_state.attributes[''is_hue_group'']
-        != true }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.old_state.attributes[''friendly_name'']
-        != ''Living Room Lamp Light'' }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.old_state.attributes[''friendly_name'']
-        != ''Living Room Stand Light'' }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.old_state.attributes[''friendly_name'']
-        != ''Living Room Lights'' }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.old_state.state == ''off'' }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.new_state.state == ''on'' }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.old_state.attributes[''friendly_name'']
-        != ''Back Door Light'' }}'
-  - condition: template
-    value_template: '{{ trigger.event.data.entity_id != "light.dresden_elektronik_conbee_ii_living_room_lights_zha_group_0x0004"
-      }}'
-  - condition: template
-    value_template: '{{ trigger.event.data.entity_id != "light.1st_landing_bulb_light_2"
-      }}'
-  - condition: template
-    value_template: '{{ trigger.event.data.entity_id != "light.2nd_landing_light"
-      }}'
-  - condition: template
-    value_template: '{{ trigger.event.data.entity_id != "light.hallway_bulb_light"
-      }}'
-  - condition: template
-    value_template: '{{ trigger.event.data.new_state.attributes.get("supported_color_modes",
-      []) != ["onoff"] }}'
-  actions:
-  - data_template:
-      entity_id: '{{ trigger.event.data.entity_id }}'
-      brightness: "{% set hour=states(\"sensor.time\").split(':')[0] | int %} {% set
-        dayOfWeek=now().weekday()  %} {%- if hour >= 0 and hour < 7 and dayOfWeek
-        in [0,1,2,3,4,5,6] -%}\n  15\n{%- elif hour >= 7 and hour < 8 and dayOfWeek
-        in [0,1,2,3,4,5,6] -%}\n  150\n{%- elif hour >= 8 and hour < 22 and dayOfWeek
-        in [0,1,2,3,4,5,6] -%}\n  255\n{%- elif hour >= 22 and hour < 23 and dayOfWeek
-        in [0,1,2,3,4,5,6] -%}\n  75\n{%- elif hour >= 23 and hour < 24 and dayOfWeek
-        in [0,1,2,3,4,5,6] -%}\n  15\n{%- else -%}\n  1\n{%- endif %}"
-    action: light.turn_on
-  mode: parallel
-  max: 10
 - id: '1604303903971'
   alias: Turn on 2nd landing light 2nd stairway motion
   description: ''
@@ -903,7 +848,7 @@
       entity_id: group.household
       state: home
     - condition: state
-      entity_id: input_boolean.its_dark
+      entity_id: input_boolean.its_dark_outside
       state:
       - 'on'
     - condition: device
@@ -1133,7 +1078,7 @@
   triggers:
   - trigger: state
     entity_id:
-    - input_boolean.its_dark
+    - input_boolean.its_dark_inside
     from:
     to:
     - 'on'
@@ -1243,12 +1188,6 @@
   description: ''
   triggers:
   - type: battery_level
-    device_id: 75db9096f36be66b1311477e1c70f862
-    entity_id: eb2b7c648e4b99fe317f980caa77ec4e
-    domain: sensor
-    trigger: device
-    below: 10
-  - type: battery_level
     device_id: 90141fb4cd5323f83917ecf7b0ab4509
     entity_id: e421f8d1dd8bd8278ed8633025a7ef46
     domain: sensor
@@ -1334,18 +1273,12 @@
   alias: 'Doorbell: Sonos'
   description: ''
   triggers:
-  - type: occupied
-    device_id: dba216959c8b59ae455371ed46ff0002
-    entity_id: 2a0adb46891cc99d86f41fae76905d14
-    domain: binary_sensor
-    trigger: device
-    id: doorbell
-    enabled: false
-  - type: turned_on
-    device_id: dba216959c8b59ae455371ed46ff0002
-    entity_id: 82711510ec9aca271a86749af0dcd7fb
-    domain: switch
-    trigger: device
+  - trigger: event.received
+    target:
+      entity_id: event.hallway_2rm_doorbell_package
+    options:
+      event_type:
+      - detected
     id: package
   - trigger: event.received
     target:
@@ -1354,43 +1287,13 @@
       event_type:
       - ring
     id: doorbell
-  - trigger: state
-    entity_id:
-    - event.g6_entry_doorbell
-    attribute: event_type
-    to:
-    - ring
-    id: doorbell
-    enabled: false
-  - trigger: state
-    entity_id:
-    - event.g6_entry_doorbell
-    id: doorbell_template
-    enabled: false
-  conditions:
-  - condition: and
-    conditions:
-    - condition: trigger
-      id:
-      - doorbell_template
-    - condition: template
-      value_template: "      {{\n        trigger.event.data.old_state is not none
-        and\n        not trigger.event.data.old_state.state == 'unavailable' and\n
-        \       trigger.event.data.new_state is not none and\n        not trigger.event.data.new_state.state
-        == 'unavailable' and\n        trigger.event.data.new_state.attributes.event_type
-        == 'ring'\n      }}"
-    enabled: false
+  conditions: []
   actions:
   - choose:
     - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id:
-          - doorbell_template
-        - condition: trigger
-          id:
-          - doorbell
+      - condition: trigger
+        id:
+        - doorbell
       sequence:
       - parallel:
         - data:
@@ -1406,6 +1309,7 @@
             message: Doorbell is ringing. Hurry up and answer the door will you.
           target:
             area_id: 6aaf5c95bc6d43e384e05551ea13ccac
+          continue_on_error: true
     - conditions:
       - condition: trigger
         id:
@@ -1425,6 +1329,7 @@
             message: ALERT! A package has been left at the front door
           target:
             area_id: 6aaf5c95bc6d43e384e05551ea13ccac
+          continue_on_error: true
   mode: parallel
   max: 10
 - id: '1673368378391'
@@ -1486,7 +1391,7 @@
       attribute: app_name
       state: YouTube
   - condition: state
-    entity_id: input_boolean.its_dark
+    entity_id: input_boolean.its_dark_inside
     state:
     - 'on'
   actions:
@@ -1525,7 +1430,7 @@
       entity_id: e7ce57dff1cd809492608ac6fab3316d
       domain: light
   - condition: state
-    entity_id: input_boolean.its_dark
+    entity_id: input_boolean.its_dark_inside
     state:
     - 'on'
   actions:
@@ -1771,7 +1676,7 @@
   triggers:
   - trigger: state
     entity_id:
-    - input_boolean.its_dark
+    - input_boolean.its_dark_inside
     to:
     - 'on'
     from:
@@ -1841,9 +1746,9 @@
   - action: cover.close_cover
     metadata: {}
     data: {}
-    target:
-      area_id: 78a330ec08974b448c83c7339c6b2018
     enabled: true
+    target:
+      entity_id: cover.rfy_010102_2
   mode: single
 - id: '1700344453717'
   alias: Turn off garden light from the garage
@@ -2175,7 +2080,7 @@
     - 'on'
   conditions:
   - condition: state
-    entity_id: input_boolean.its_dark
+    entity_id: input_boolean.its_dark_outside
     state: 'on'
   actions:
   - action: switch.turn_on
@@ -2365,7 +2270,7 @@
     - home
   - trigger: state
     entity_id:
-    - input_boolean.its_dark
+    - input_boolean.its_dark_outside
     to:
     - 'on'
     from:
@@ -2375,7 +2280,7 @@
     state:
     - home
   - condition: state
-    entity_id: input_boolean.its_dark
+    entity_id: input_boolean.its_dark_outside
     state:
     - 'on'
   actions:
@@ -2648,7 +2553,7 @@
     id: Temperature
   - trigger: state
     entity_id:
-    - input_boolean.its_dark
+    - input_boolean.its_dark_inside
     to:
     - 'on'
   - trigger: time
@@ -2840,7 +2745,7 @@
       entity_id: input_boolean.run_hot_water
   mode: single
 - id: '1747754792264'
-  alias: 'Helper: It''s Dark'
+  alias: 'Helper: It''s Dark Inside'
   description: ''
   triggers:
   - trigger: state
@@ -2875,7 +2780,7 @@
     metadata: {}
     data: {}
     target:
-      entity_id: input_boolean.its_dark
+      entity_id: input_boolean.its_dark_inside
   mode: single
 - id: '1747807173778'
   alias: 'Helper: It''s Light'
@@ -2923,7 +2828,9 @@
     metadata: {}
     data: {}
     target:
-      entity_id: input_boolean.its_dark
+      entity_id:
+      - input_boolean.its_dark_inside
+      - input_boolean.its_dark_outside
   mode: single
 - id: '1750400693755'
   alias: 'Blinds: Close 1st Landing when high temp'
@@ -3033,46 +2940,6 @@
     target:
       entity_id: input_boolean.garden_light_auto_override
   mode: single
-- id: '1209348756'
-  alias: detect lights and adjust the brightness when turned on based on time
-  description: ''
-  triggers:
-  - event_type: state_changed
-    trigger: event
-  conditions:
-  - condition: and
-    conditions:
-    - condition: state
-      entity_id: group.family
-      state: home
-    - condition: template
-      value_template: '{{ trigger.event.data is not none }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.entity_id is not none }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.entity_id.split(''.'')[0] == ''light''
-        }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.entity_id.split(''_'')[0] != ''light.living_room_ceiling_light_switch''
-        }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.old_state.attributes[''is_hue_group'']
-        != true }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.old_state.state == ''off'' }}'
-    - condition: template
-      value_template: '{{ trigger.event.data.new_state.state == ''on'' }}'
-  actions:
-  - data_template:
-      entity_id: '{{ trigger.event.data.entity_id }}'
-      brightness: "{% set hour=states(\"sensor.time\").split(':')[0] | int %} {% set
-        dayOfWeek=now().weekday()  %} {%- if hour >= 0 and hour < 7 and dayOfWeek
-        in [0,1,2,3,4,5,6] -%}\n  15\n{%- elif hour >= 7 and hour < 9 and dayOfWeek
-        in [0,1,2,3,4,5,6] -%}\n  75\n{%- elif hour >= 9 and hour < 22 and dayOfWeek
-        in [0,1,2,3,4,5,6] -%}\n  100\n{%- elif hour >= 23 and hour < 24 and dayOfWeek
-        in [0,1,2,3,4,5,6] -%}\n  50\n{%- else -%}\n  1\n{%- endif %}"
-    action: light.turn_on
-  mode: single
 - id: '1754744381291'
   alias: Free Electricity - Turn on Immersion
   description: ''
@@ -3127,115 +2994,6 @@
     path: TheFes/1_voice_weather_forecast_local.yaml
     input:
       weather_entity: weather.openweathermap
-- id: assist_alarmtimereached
-  alias: Assist - AlarmTimeReached
-  description: Assist automation when set alarm time is reached.
-  triggers:
-  - value_template: '{{ as_timestamp(states.input_datetime.assist_alarmtime.state)
-      | round == as_timestamp(now()) | round  }}  '
-    alias: Time equals set alarm
-    trigger: template
-  conditions:
-  - condition: state
-    entity_id: input_boolean.assist_alarm
-    state: 'on'
-    alias: Alarm is set
-  actions:
-  - alias: Set variables
-    variables:
-      alarm_target: "{%- if settings.get('alarm_target')[:13] == \"media_player.\"
-        %}\n{{- settings.get('alarm_target') }}\n{%- elif (settings.get('alarm_target')[:7]
-        == \"sensor.\" or settings.get('alarm_target')[:11] == \"input_text.\") and
-        (states(settings.get('alarm_target'))[:13] == \"media_player.\") %}\n{{- states(settings.get('alarm_target'))
-        }}\n{%- elif (settings.get('alarm_target')[:7] == \"sensor.\" or settings.get('alarm_target')[:11]
-        == \"input_text.\") and (states(settings.get('alarm_target')) == \"\") %}\n{{-
-        settings.get('timer_target_default') }}\n{%- else %}\n{%- set media_player_list
-        = states.media_player | map(attribute='entity_id') | list %}\n{%- if \"sensor.\"
-        in settings.get('alarm_target') or \"input_text.\" in settings.get('alarm_target')
-        %}\n{%- set target_area = states(settings.get('alarm_target')) %}\n{%- else
-        %}\n{%- set target_area = settings.get('alarm_target') %}\n{%- endif %}        \n{%-
-        for entity_id in media_player_list %}\n{%- if area_name(entity_id) | lower
-        == target_area | lower %}\n- {{ entity_id }}\n{%- endif %}\n{%- endfor %}\n{%-
-        endif %}  \n"
-      alarm_tts: '{{ settings.get(''alarm_tts'') }}'
-      tts_service: '{{ settings.get(''tts_service'') }}'
-      tts_message: '{{ settings.get(''tts_message'') }}'
-      media_location: '{{ settings.get(''media_location'') }}'
-      lights_turn_on: '{{ settings.get(''lights_turn_on'') }}'
-      lights_delay: '{{ settings.get(''lights_delay'') }}'
-      lights: '{{ settings.get(''lights'') }}'
-  - alias: Disable wakeword
-    data:
-      entity_id: switch.bedroom_4_child_lock
-    action: switch.turn_off
-  - alias: Media file or TTS
-    choose:
-    - conditions:
-      - alias: Alarm is a media file
-        condition: template
-        value_template: '{{ alarm_tts == false }}'
-      sequence:
-      - alias: Play media
-        target:
-          entity_id: '{% if ''sensor.'' in alarm_target %} states(alarm_target) {%
-            else %} {{ alarm_target }} {% endif %}'
-        data:
-          announce: true
-          media:
-            media_content_id: '{{ media_location }}'
-            media_content_type: music
-            metadata: {}
-        enabled: true
-        action: media_player.play_media
-      alias: Media file
-    default:
-    - data:
-        cache: true
-        entity_id: '{% if ''sensor.'' in alarm_target %} {{ states(alarm_target)}}
-          {% else %} {{ alarm_target }} {% endif %}'
-        message: '{% if ''sensor.'' in tts_message %} states(tts_message) {% else
-          %} {{ tts_message }} {% endif %}'
-      alias: TTS
-      action: '{{ tts_service }}'
-  - metadata: {}
-    data: {}
-    target:
-      entity_id: input_boolean.assist_alarm
-    alias: Turn off alarm boolean
-    action: input_boolean.turn_off
-  - alias: Turn on wakeword
-    data:
-      entity_id: switch.bedroom_4_child_lock
-    action: switch.turn_on
-  - alias: Turn on light(s) if set to true
-    choose:
-    - conditions:
-      - condition: template
-        value_template: '{{ lights_turn_on == true }}'
-        alias: Lights_turn_on is true
-      sequence:
-      - delay:
-          seconds: '{% if lights_delay is defined %} {{ lights_delay }} {% else %}
-            5 {% endif %}'
-        alias: Delay lights turning on
-      - target:
-          entity_id: '{{ lights }}'
-        alias: Turn on lights
-        action: light.turn_on
-      alias: Lights_turn_on is true
-  variables:
-    settings:
-      alarm_target: bedroom
-      alarm_target_default: media_player.bedroom
-      alarm_tts: true
-      tts_service: tts.cloud_say
-      tts_message: Goodmorning sunshine! Time to get up!
-      media_location: /media/local/wakeup.mp3
-      lights_turn_on: true
-      lights_delay: 5
-      lights:
-      - light.slaapkamer
-  mode: single
 - id: '1764258668126'
   alias: CalcioLive - Notification 15 minutes before the Arsenal match
   description: Send a notification to your mobile phone 15 minutes before the match
@@ -4167,8 +3925,8 @@
 - id: '1786727156700'
   alias: Living Room No Presence Shutdown
   description: Turns off the TV, Sonos, and main lights in the living room when no
-    presence has been detected for 1 minute. Uses a stamped input_datetime instead
-    of a bare 'for:' so the 1-minute wait isn't reset by HA restarts or brief unavailable
+    presence has been detected for 5 minutes. Uses a stamped input_datetime instead
+    of a bare 'for:' so the 5-minute wait isn't reset by HA restarts or brief unavailable
     blips.
   triggers:
   - entity_id: binary_sensor.everything_presence_one_289cf8_occupancy
@@ -4201,19 +3959,24 @@
       - condition: template
         value_template: '{{ state_attr(''input_datetime.living_room_presence_cleared'',
           ''timestamp'') is not none and (now().timestamp() - state_attr(''input_datetime.living_room_presence_cleared'',
-          ''timestamp'')) >= 60 and (now().timestamp() - state_attr(''input_datetime.living_room_presence_cleared'',
-          ''timestamp'')) < 75 }}'
+          ''timestamp'')) >= 300 and (now().timestamp() - state_attr(''input_datetime.living_room_presence_cleared'',
+          ''timestamp'')) < 315 }}'
       sequence:
       - action: media_player.turn_off
         target:
           entity_id:
           - media_player.living_room_tv_4
-          - media_player.sonos_one
+        data: {}
       - action: light.turn_off
         target:
           entity_id:
           - light.dresden_elektronik_conbee_ii_living_room_lights_zha_group_0x0004
           - light.living_room_ceiling_light_switch
+      - action: media_player.media_stop
+        metadata: {}
+        target:
+          entity_id: media_player.sonos_one
+        data: {}
   mode: single
 - id: '1787297916498'
   alias: Set brightness by time - Landing & Hallway bulbs
@@ -4520,23 +4283,25 @@
     to avoid an unclean power-loss shutdown.
   triggers:
   - trigger: numeric_state
-    entity_id: sensor.eaton_3s_battery_charge
+    entity_id:
+    - sensor.apcups_battery_charge
     below: 10
     id: battery_low
     note: Fires the moment battery charge crosses below 10%.
   - trigger: state
-    entity_id: sensor.eaton_3s_status_data
+    entity_id:
+    - sensor.apcups_status_data
     id: status_changed
     note: Also re-check whenever the UPS status flags change (e.g. mains lost) while
       battery is already below 10%.
   conditions:
   - condition: numeric_state
-    entity_id: sensor.eaton_3s_battery_charge
+    entity_id: sensor.apcups_battery_charge
     below: 10
     note: Battery charge below 10%.
   - condition: template
-    value_template: '{{ ''OL'' not in states(''sensor.eaton_3s_status_data'').split()
-      or ''CHRG'' not in states(''sensor.eaton_3s_status_data'').split() }}'
+    value_template: '{{ ''OL'' not in states(''sensor.apcups_status_data'').split()
+      or ''CHRG'' not in states(''sensor.apcups_status_data'').split() }}'
     note: 'NUT reports space-separated status flags (e.g. ''OL CHRG''). ''OL'' absent
       means mains/on-line power is not connected; ''CHRG'' absent means the battery
       is not charging. No native condition can tokenize a composite status string,
@@ -4546,11 +4311,6 @@
     target:
       entity_id: button.pve03_shut_down
     note: Proxmox VE integration's node shutdown button for pve03.
-    data: {}
-  - action: button.press
-    metadata: {}
-    target:
-      entity_id: button.diskstation_shutdown
     data: {}
   mode: single
 - id: '1788004607298'
@@ -4670,8 +4430,8 @@
       - sensor.travel_hannah_time_to_work_google_travel_time
       - sensor.travel_hannah_time_to_home
   mode: single
-- id: '1788600623927'
-  alias: 'Voice: Play radio station in this room'
+- alias: 'Voice: Play radio station in this room'
+  id: '1788600623927'
   description: 'Sentence-triggered: plays a Music Assistant radio station, by name,
     on the Sonos speaker in whichever room the voice satellite that heard the request
     is located in.'
@@ -4734,140 +4494,163 @@
     - set_conversation_response: There's no speaker set up in this room yet.
   max: 5
   mode: queued
-  - alias: Assist - TimerReached
-    id: assist_timerreached
-    description: Assist automation when set timer time is reached.
-    trigger:
-      - alias: "Any timer reached"
-        id: "timer_finished"
-        platform: event
-        event_type: timer.finished
-    condition:
-      - condition: template
-        value_template: "{{ trigger.event.data.entity_id[:18] == 'timer.assist_timer3' }}"
-        alias: Finished timer is an assist timer
-    variables:
-      settings: *settings
-    action:
-      - alias: "Get generic variables from script"
-        variables:
-          timer_tts: "{{ settings.get('timer_tts') }}"
-          timer_tts_service: "{{ settings.get('timer_tts_service') }}"
-          timer_tts_target: "{{ settings.get('timer_tts_target') }}"
-          timer_tts_message: "{{ settings.get('timer_tts_message') }}"
-          timer_media_location: "{{ settings.get('timer_media_location') }}"
-          timer_volume: "{{ settings.get('timer_volume') }}"
-          timer_target: >-
-            {%- if settings.get('timer_target')[:13] == "" %}
-            {{- settings.get('timer_target_default') }}
-            {%- elif settings.get('timer_target')[:13] == "media_player." %}
-            {{- settings.get('timer_target') }}
-            {%- elif (settings.get('timer_target')[:7] == "sensor." or settings.get('timer_target')[:11] == "input_text.") and (states(settings.get('timer_target'))[:13] == "media_player.") %}
-            {{- states(settings.get('timer_target')) }}
-            {%- elif (settings.get('timer_target')[:7] == "sensor." or settings.get('timer_target')[:11] == "input_text.") and (states(settings.get('timer_target')) == "") %}
-            {{- settings.get('timer_target_default') }}
-            {%- else %}
-            {%- set media_player_list = states.media_player | map(attribute='entity_id') | list %}
-            {%- if "sensor." in settings.get('timer_target') or "input_text." in target_area %}
-            {%- set target_area = states(settings.get('timer_target')) %}
-            {%- else %}
-            {%- set target_area = settings.get('timer_target') %}
-            {%- endif %}
-            {%- for entity_id in media_player_list %}
-            {%- if area_name(entity_id) | lower == target_area | lower %}
-            {{ entity_id }}
-            {%- endif %}
-            {%- endfor %}
-            {%- endif %}
-      - alias: "Store current device volume"
-        variables:
-          device_volume: "{{ state_attr(timer_target, 'volume_level') }}"
-      - alias: "Set volume for timer"
-        service: media_player.volume_set
-        data:
-          volume_level: "{{ timer_volume }}"
+- id: '1790786220643'
+  alias: 'Kitchen tablet: battery charge management'
+  description: Turns off the kitchen tablet power socket when the SM-T500 battery
+    reaches 95%, and turns it back on when the battery drops to 50%, to avoid keeping
+    the tablet at 100% permanently.
+  triggers:
+  - above: 94
+    entity_id: sensor.sm_t500_battery_level
+    id: charged
+    trigger: numeric_state
+  - below: 51
+    entity_id: sensor.sm_t500_battery_level
+    id: low
+    trigger: numeric_state
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: charged
+      - condition: state
+        entity_id: switch.tablet_usb_switch
+        state:
+        - 'on'
+      sequence:
+      - action: switch.turn_off
         target:
-          entity_id: "{{ timer_target }}"
-      - alias: Media file or TTS
-        choose:
-          - conditions:
-              - alias: Timer is a media file
-                condition: template
-                value_template: "{{ timer_tts == false }}"
-            sequence:
-              - alias: Play media
-                service: media_player.play_media
-                target:
-                  entity_id: "{{ timer_target }}"
-                data:
-                  media_content_id: "{{ timer_media_location }}"
-                  announce: true
-                  media_content_type: music
-                enabled: true
-            alias: Media file
-        default:
-          - delay:
-              seconds: 1
-          - alias: Choose TTS service
-            choose:
-              - conditions:
-                  - alias: "tts.cloud_say"
-                    condition: template
-                    value_template: "{{ timer_tts_service != 'tts.speak' }}"
-                sequence:
-                  - service: "{{ timer_tts_service }}"
-                    data:
-                      entity_id: "{{ timer_target }}"
-                      message: >-
-                        {% if timer_tts_message[:7] == "sensor." or timer_tts_message[:11] == "input_text." %}
-                        {{ states(timer_tts_message) }}
-                        {% else %}
-                        {{ timer_tts_message }}
-                        {% endif %}
-                      cache: true
-            default:
-              - service: tts.speak
-                data:
-                  media_player_entity_id: "{{ timer_target }}"
-                  message: >-
-                    {% if timer_tts_message[:7] == "sensor." or timer_tts_message[:11] == "input_text." %}
-                    {{ states(timer_tts_message) }}
-                    {% else %}
-                    {{ timer_tts_message }}
-                    {% endif %}
-                  cache: true
-                target:
-                  entity_id: "{{ timer_tts_target }}"
-      - alias: "Restore device previous volume"
-        service: media_player.volume_set
-        data:
-          volume_level: "{{ device_volume }}"
+          entity_id:
+          - switch.tablet_usb_switch
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: low
+      - condition: state
+        entity_id: switch.tablet_usb_switch
+        state:
+        - 'off'
+      sequence:
+      - action: switch.turn_on
         target:
-          entity_id: "{{ timer_target }}"
-    mode: single
-  - alias: Assist - TimerFinished
-    id: assist_timerfinished
-    description: Assist automation when set timer time is finished.
-    trigger:
-      - platform: state
-        entity_id:
-          - timer.assist_timer1
-          - timer.assist_timer2
-          - timer.assist_timer3
-        to: "idle"
-        alias: Assist timer finished or cancelled
-    condition:
-      - condition: template
-        value_template: "{{ trigger.from_state != trigger.to_state }}"
-        alias: "Timer was active or paused"
-    action:
-      - delay:
-          seconds: 3
-        alias: "Delay for Timer Reached automation"
-      - alias: "Reset timer location"
-        service: input_text.set_value
-        target:
-          entity_id: "{{ 'input_text.' + trigger.entity_id[6:] + '_location' }}"
-        data:
-          value: ""
-    mode: parallel
+          entity_id:
+          - switch.tablet_usb_switch
+        data: {}
+  mode: single
+- id: '1791310907719'
+  alias: Presence-activated Light
+  description: Turns on the living room lamps when presence is detected and 'its dark'
+    is on. Also catches the case where it gets dark while someone is already in the
+    room. Turning off is handled by 'Living Room No Presence Shutdown' (5 minutes).
+  triggers:
+  - entity_id: binary_sensor.everything_presence_one_289cf8_occupancy
+    id: presence
+    to: 'on'
+    trigger: state
+  - entity_id: input_boolean.its_dark_inside
+    id: got_dark
+    to: 'on'
+    trigger: state
+  conditions:
+  - condition: state
+    entity_id: input_boolean.its_dark_inside
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.everything_presence_one_289cf8_occupancy
+    state: 'on'
+  actions:
+  - action: light.turn_on
+    target:
+      entity_id: light.dresden_elektronik_conbee_ii_living_room_lights_zha_group_0x0004
+  mode: single
+- id: '1600620647999'
+  alias: detect lights and adjust the brightness when turned on based on time
+  triggers:
+  - event_type: state_changed
+    trigger: event
+  conditions:
+  - condition: and
+    conditions:
+    - condition: template
+      value_template: '{{ trigger.event.data is not none }}'
+    - condition: template
+      value_template: '{{ trigger.event.data.entity_id is not none }}'
+    - condition: template
+      value_template: '{{ trigger.event.data.entity_id.split(''.'')[0] == ''light''}}'
+    - condition: template
+      value_template: '{{ trigger.event.data.old_state.attributes[''is_hue_group'']
+        != true }}'
+    - condition: template
+      value_template: '{{ trigger.event.data.old_state.attributes[''friendly_name'']
+        != ''Living Room Lamp Light'' }}'
+    - condition: template
+      value_template: '{{ trigger.event.data.old_state.attributes[''friendly_name'']
+        != ''Living Room Stand Light'' }}'
+    - condition: template
+      value_template: '{{ trigger.event.data.old_state.attributes[''friendly_name'']
+        != ''Living Room Lights'' }}'
+    - condition: template
+      value_template: '{{ trigger.event.data.old_state.state == ''off'' }}'
+    - condition: template
+      value_template: '{{ trigger.event.data.new_state.state == ''on'' }}'
+    - condition: template
+      value_template: '{{ trigger.event.data.old_state.attributes[''friendly_name'']
+        != ''Back Door Light'' }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.entity_id != "light.dresden_elektronik_conbee_ii_living_room_lights_zha_group_0x0004"
+      }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.entity_id != "light.1st_landing_bulb_light_2"
+      }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.entity_id != "light.2nd_landing_light"
+      }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.entity_id != "light.hallway_bulb_light"
+      }}'
+  - condition: template
+    value_template: '{{ trigger.event.data.new_state.attributes.get("supported_color_modes",
+      []) != ["onoff"] }}'
+  actions:
+  - action: light.turn_on
+    data_template:
+      brightness: "{% set hour=states(\"sensor.time\").split(':')[0] | int %} {% set
+        dayOfWeek=now().weekday()  %} {%- if hour >= 0 and hour < 7 and dayOfWeek
+        in [0,1,2,3,4,5,6] -%}\n  15\n{%- elif hour >= 7 and hour < 8 and dayOfWeek
+        in [0,1,2,3,4,5,6] -%}\n  150\n{%- elif hour >= 8 and hour < 22 and dayOfWeek
+        in [0,1,2,3,4,5,6] -%}\n  255\n{%- elif hour >= 22 and hour < 23 and dayOfWeek
+        in [0,1,2,3,4,5,6] -%}\n  75\n{%- elif hour >= 23 and hour < 24 and dayOfWeek
+        in [0,1,2,3,4,5,6] -%}\n  15\n{%- else -%}\n  1\n{%- endif %}"
+      entity_id: '{{ trigger.event.data.entity_id }}'
+  max: 10
+  mode: parallel
+- id: '1791790514459'
+  alias: 'Helper: It''s Dark Outside'
+  description: 'Turns on its_dark_outside when the garden illuminance stays below
+    50 lux for 5 minutes in the afternoon/evening. Turned off by ''Helper: It''s Light'',
+    which handles both booleans.'
+  triggers:
+  - below: 50
+    entity_id:
+    - sensor.garden_illuminance
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    trigger: numeric_state
+  conditions:
+  - after: '14:00:00'
+    condition: time
+  - condition: sun.elevation
+    options:
+      threshold:
+        type: below
+        value:
+          active_choice: number
+          number: 5
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.its_dark_outside
+  mode: single

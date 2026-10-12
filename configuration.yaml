@@ -16,6 +16,12 @@ frontend:
 #    - 172.30.33.12
 #  ip_ban_enabled: false
 #  login_attempts_threshold: 5
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 172.30.33.0/24
+  ip_ban_enabled: true
+  login_attempts_threshold: 5
 
 homeassistant:
   customize: !include customize.yaml
@@ -35,11 +41,13 @@ scene: !include scenes.yaml
 sensor: !include sensors.yaml
 media_player: !include media_players.yaml
 template: !include templates.yaml
-intent: !include intents.yaml
+intent:
 rest_command: !include rest_commands.yaml
 
 logger:
   default: error
+  logs:
+    homeassistant.components.http.ban: warning
   #logs:
   #homeassistant.components.mqtt: info
   #aiounifi: debug
@@ -75,14 +83,14 @@ tts:
   - platform: google_translate
     service_name: google_translate_say
 
-device_tracker:
-  #  - platform: bluetooth_tracker
-  - platform: bluetooth_le_tracker
-    track_battery: true
-    track_new_devices: true
-    interval_seconds: 30
-    track_battery_interval:
-      days: 1
+#device_tracker:
+#  - platform: bluetooth_tracker
+#  - platform: bluetooth_le_tracker
+#    track_battery: true
+#    track_new_devices: true
+#    interval_seconds: 30
+#    track_battery_interval:
+#      days: 1
 input_boolean:
   night_mode:
     name: "Night Mode"
