@@ -154,10 +154,6 @@ tell_hannah_to_get_out_of_bed:
       tts_service_name: google_translate_say
   mode: single
   icon: mdi:human-female-dance
-'1708111166653':
-  alias: Text-to-Speech on Sonos
-  use_blueprint:
-    path: Talvish/sonos_say.yaml
 run_hot_water_for_1hr:
   sequence:
   - action: tado.set_water_heater_timer

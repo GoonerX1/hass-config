@@ -153,24 +153,19 @@
     metadata: {}
     target:
       entity_id:
-      - switch.xmas_lights
-      - switch.xmas_lights_2
+      - switch.kitchen_xmas_lights
+      - switch.living_room_xmas_lights
     data: {}
-  - action: climate.set_preset_mode
+  - action: camera.enable_motion_detection
     metadata: {}
     target:
       entity_id:
-      - climate.vtherm_bedroom_1
-      - climate.vtherm_bedroom_2
-      - climate.vtherm_bedroom_3
-      - climate.vtherm_bedroom_4
-      - climate.vtherm_kitchen
-      - climate.vtherm_living_room
-    data:
-      preset_mode: none
+      - camera.blink_back_gate
+      - camera.blink_front_door
+    data: {}
   mode: single
 - id: '1580662467114'
-  alias: Arm items Home
+  alias: DisArm items Home
   description: ''
   triggers:
   - entity_id: group.household
@@ -194,18 +189,13 @@
   - action: script.sonos_play_radio_x
     metadata: {}
     data: {}
-  - action: climate.set_preset_mode
+  - action: camera.disable_motion_detection
     metadata: {}
-    data:
-      preset_mode: comfort
     target:
       entity_id:
-      - climate.vtherm_bedroom_1
-      - climate.vtherm_bedroom_2
-      - climate.vtherm_bedroom_3
-      - climate.vtherm_bedroom_4
-      - climate.vtherm_kitchen
-      - climate.vtherm_living_room
+      - camera.blink_back_gate
+      - camera.blink_front_door
+    data: {}
   mode: single
 - id: '1580663686647'
   alias: Blink Image Update
@@ -378,7 +368,7 @@
   description: ''
   triggers:
   - entity_id:
-    - media_player.living_room_tv_4
+    - media_player.living_room_living_room_tv
     for:
       hours: 0
       minutes: 10
@@ -409,7 +399,7 @@
   description: ''
   triggers:
   - entity_id:
-    - media_player.living_room_tv_4
+    - media_player.living_room_living_room_tv
     for:
       hours: 0
       minutes: 10
@@ -750,7 +740,8 @@
     conditions:
     - condition: state
       entity_id: sensor.season_metrological_2
-      state: Summer
+      state:
+      - summer
   - condition: state
     state: home
     entity_id: group.household
@@ -758,7 +749,7 @@
   - action: cover.open_cover
     data: {}
     target:
-      area_id: 6aaf5c95bc6d43e384e05551ea13ccac
+      entity_id: cover.rfy_010103_1
   mode: single
 - id: '1600620477487'
   alias: 'Night Mode: On'
@@ -1407,7 +1398,7 @@
   triggers:
   - entity_id:
     - media_player.living_room_tv
-    - media_player.living_room_tv_4
+    - media_player.living_room_living_room_tv
     - media_player.sony_xr_55a84j
     from:
     - playing
@@ -1449,40 +1440,74 @@
     entity_id: binary_sensor.samjin_multi_ddd30701_ias_zone
     domain: binary_sensor
     trigger: device
+    id: front_door
   - type: opened
     device_id: 6a73f09c9eb14353b4e8254e7809d46f
     entity_id: binary_sensor.back_door_iaszone
     domain: binary_sensor
     trigger: device
+    id: back_door
   conditions:
   - condition: state
     entity_id: group.household
     state: home
   actions:
-  - data: {}
-    target:
-      entity_id: alarm_control_panel.blink_home
-    action: alarm_control_panel.alarm_arm_away
-  - wait_for_trigger:
-    - type: not_opened
-      device_id: 032e6037fba540ad8ee0d4423212ae9f
-      entity_id: binary_sensor.samjin_multi_ddd30701_ias_zone
-      domain: binary_sensor
-      trigger: device
-    - type: not_opened
-      device_id: 6a73f09c9eb14353b4e8254e7809d46f
-      entity_id: binary_sensor.back_door_iaszone
-      domain: binary_sensor
-      trigger: device
-  - delay:
-      hours: 0
-      minutes: 1
-      seconds: 0
-      milliseconds: 0
-  - data: {}
-    target:
-      entity_id: alarm_control_panel.blink_home
-    action: alarm_control_panel.alarm_disarm
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - front_door
+      sequence:
+      - action: camera.enable_motion_detection
+        metadata: {}
+        target:
+          entity_id:
+          - camera.blink_front_door
+        data: {}
+      - wait_for_trigger:
+        - type: not_opened
+          device_id: 032e6037fba540ad8ee0d4423212ae9f
+          entity_id: binary_sensor.samjin_multi_ddd30701_ias_zone
+          domain: binary_sensor
+          trigger: device
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
+      - action: camera.disable_motion_detection
+        metadata: {}
+        target:
+          entity_id:
+          - camera.blink_front_door
+        data: {}
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - back_door
+      sequence:
+      - action: camera.enable_motion_detection
+        metadata: {}
+        data: {}
+        target:
+          entity_id: camera.blink_back_gate
+      - wait_for_trigger:
+        - type: not_opened
+          device_id: 6a73f09c9eb14353b4e8254e7809d46f
+          entity_id: 03798cfb34fca66255154209ca6e4d13
+          domain: binary_sensor
+          trigger: device
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
+      - action: camera.disable_motion_detection
+        metadata: {}
+        data: {}
+        target:
+          entity_id: camera.blink_back_gate
   mode: single
 - id: '1676530515029'
   alias: Disarm Blink when door closes
@@ -1693,7 +1718,7 @@
       entity_id: media_player.sony_xr_55a84j
       type: is_on
     - condition: state
-      entity_id: media_player.living_room_tv_4
+      entity_id: media_player.living_room_living_room_tv
       state:
       - playing
       - 'on'
@@ -1731,7 +1756,7 @@
       - playing
       - paused
     - condition: state
-      entity_id: remote.living_room_tv_2
+      entity_id: remote.living_room_living_room_tv
       state:
       - 'on'
   actions:
@@ -2719,12 +2744,10 @@
     to: playing
     enabled: false
   conditions:
-  - condition: not
-    conditions:
-    - condition: template
-      value_template: '  {{ states(''sensor.octopus_free_electricity_session_active_in_last_24h'')
-        | int > 0 }}'
-      alias: If Octopus Free Electricity has been on in last 24H
+  - condition: numeric_state
+    entity_id: sensor.fstwifitu_immersion_on_today
+    below: 0.5
+    alias: Skip gas if immersion has run 30+ minutes today
   - condition: or
     alias: Household member home now, or home within the last 10 hours
     conditions:
@@ -2806,13 +2829,16 @@
   - trigger: time
     at: 07:00:00
   conditions:
-  - condition: state
-    entity_id: binary_sensor.g5_bullet_is_dark_2
-    state: 'off'
-  - condition: state
-    entity_id: binary_sensor.g6_entry_is_dark
-    state:
-    - 'off'
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: binary_sensor.g5_bullet_is_dark_2
+      state: 'on'
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: binary_sensor.g6_entry_is_dark
+      state: 'on'
   - condition: state
     entity_id: binary_sensor.g4_instant_is_dark
     state: 'off'
@@ -2872,20 +2898,21 @@
     - condition: template
       value_template: '{{ trigger.json.alarm.triggers[0].value == ''Karen Meen'' }}'
     - condition: template
-      value_template: '{{ trigger.json.alarm.triggers[0].value == ''Hannah Vaugon''
+      value_template: '{{ trigger.json.alarm.triggers[0].value == ''Hannah Chapman''
         }}'
     - condition: template
       value_template: '{{ trigger.json.alarm.triggers[0].value == ''Adrian Chapman''
         }}'
+    enabled: true
   actions:
   - data:
-      title: '{{ trigger.payload_json.alarm.name }}
+      title: '{{ trigger.json.alarm.name }}
 
         '
-      message: 'Face detected: {{ trigger.payload_json.alarm.triggers[0].value }}
+      message: 'Face detected: {{ trigger.json.alarm.triggers[0].value }}
 
         '
-    action: notify.adrian_mobile
+    action: notify.mobile_app_adrian_s26
   mode: single
 - id: '1752580862564'
   alias: Renew Let's Encrypt Certificate
@@ -2947,6 +2974,7 @@
   - trigger: state
     entity_id:
     - calendar.octopus_energy_a_038dd11d_octoplus_power_up
+    - calendar.octopus_energy_a_038dd11d_octoplus_free_electricity_session
     from:
     - 'off'
     to:
@@ -2975,6 +3003,7 @@
   - trigger: state
     entity_id:
     - calendar.octopus_energy_a_038dd11d_octoplus_power_up
+    - calendar.octopus_energy_a_038dd11d_octoplus_free_electricity_session
     from:
     - 'on'
     to:
@@ -3153,21 +3182,21 @@
     - condition: device
       type: is_on
       device_id: 99df6fb8658018f2ddd6f113361bb2c7
-      entity_id: 06b28ebbc13a817aef2dd5827468c95d
+      entity_id: 2c13a20cd35ea59ff383930fa831cb99
       domain: switch
     - condition: device
       type: is_on
       device_id: bef964e283740c791a9d677a057ad45a
-      entity_id: 911f893142ce5afa37c0bfd9b82a3c97
+      entity_id: f243a97fb917bc6084e9aec4d8a02254
       domain: switch
   actions:
   - type: turn_off
     device_id: 99df6fb8658018f2ddd6f113361bb2c7
-    entity_id: 06b28ebbc13a817aef2dd5827468c95d
+    entity_id: 2c13a20cd35ea59ff383930fa831cb99
     domain: switch
   - type: turn_off
     device_id: bef964e283740c791a9d677a057ad45a
-    entity_id: 911f893142ce5afa37c0bfd9b82a3c97
+    entity_id: f243a97fb917bc6084e9aec4d8a02254
     domain: switch
   mode: single
 - id: tado_pause_heating_notify_action
@@ -3636,6 +3665,18 @@
     weekday:
     - sat
   actions:
+  - action: blink.trigger_camera
+    metadata: {}
+    target:
+      entity_id:
+      - camera.blink_back_gate
+      - camera.blink_front_door
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 30
+      milliseconds: 0
   - variables:
       year: '{{ now().year }}'
       month: '{{ ''%02d'' % now().month }}'
@@ -3646,13 +3687,17 @@
       month: '{{ month }}'
     action: shell_command.create_snapshot_dirs
   - data:
-      entity_id: camera.blink_front_door
       filename: '{{ base_path }}/{{ year }}/{{ month }}/front_door_{{ timestamp }}.jpg'
     action: camera.snapshot
+    target:
+      entity_id:
+      - camera.blink_back_gate
   - data:
-      entity_id: camera.blink_back_gate
       filename: '{{ base_path }}/{{ year }}/{{ month }}/back_gate_{{ timestamp }}.jpg'
     action: camera.snapshot
+    target:
+      entity_id: camera.blink_front_door
+    enabled: true
   mode: single
 - id: '1772390818584'
   alias: Add multiple items to shopping list
@@ -3964,8 +4009,7 @@
       sequence:
       - action: media_player.turn_off
         target:
-          entity_id:
-          - media_player.living_room_tv_4
+          entity_id: media_player.living_room_living_room_tv
         data: {}
       - action: light.turn_off
         target:
@@ -4314,43 +4358,88 @@
     data: {}
   mode: single
 - id: '1788004607298'
-  alias: 'Heating: Central Mode Schedule'
-  description: Keeps VTherm's Central Mode aligned with season, time of day, and outdoor
-    temperature. Comfort/eco/boost heating is only allowed between 14:00-22:00 when
-    Garden Temperature is below 13C, and only outside summer. At all other times (before
-    14:00, at/after 22:00, garden 13C or warmer, or summer) Central Mode drops to
-    Frost protection - individual VTherm thermostats still float freely, but comfort
-    call-outs are blocked and only the 7C frost floor remains active, so pipes stay
-    protected. Re-syncs on HA restart too, in case Central Mode was left in a manual
-    state.
+  alias: 'Heating: Schedule'
+  description: 'Single source of truth for heating. All VTherms stay in Heat mode
+    and are driven by preset: Comfort only when ALL of: 15:00-22:00, someone home
+    (binary_sensor.anyone_home) and garden temperature below 13C. At every other time:
+    Frost (7C). Re-evaluates on window start/end, presence change, garden temperature
+    crossing 13C, and 60s after HA restart. Replaces ''Heating: Turn on''.'
   triggers:
-  - trigger: state
-    entity_id: sensor.season_metrological_2
-    id: SeasonChanged
-  - trigger: homeassistant
-    event: start
+  - event: start
     id: Startup
-  - trigger: time
-    at: '14:00:00'
+    trigger: homeassistant
+  - at: '15:00:00'
     id: WindowOpens
-  - trigger: time
-    at: '22:00:00'
+    trigger: time
+  - at: '22:00:00'
     id: WindowCloses
-  - trigger: numeric_state
+    trigger: time
+  - entity_id: binary_sensor.anyone_home
+    id: Arrived
+    to: 'on'
+    trigger: state
+  - entity_id: binary_sensor.anyone_home
+    for:
+      minutes: 10
+    id: Left
+    to: 'off'
+    trigger: state
+  - below: 13
     entity_id: sensor.garden_temperature
-    below: 13
-    id: GardenColdEnough
-  - trigger: numeric_state
+    for:
+      minutes: 10
+    id: GardenCold
+    trigger: numeric_state
+  - above: 13
     entity_id: sensor.garden_temperature
-    above: 13
-    id: GardenTooWarm
+    for:
+      minutes: 10
+    id: GardenWarm
+    trigger: numeric_state
   conditions: []
   actions:
   - if:
     - condition: trigger
       id: Startup
     then:
-    - action: climate.set_hvac_mode
+    - alias: Let VTherm and Tado finish restoring before re-asserting the schedule
+      delay:
+        seconds: 60
+  - action: select.select_option
+    alias: Central mode Auto so per-room presets apply
+    data:
+      option: Auto
+    target:
+      entity_id: select.central_mode
+  - choose:
+    - conditions:
+      - after: '15:00:00'
+        before: '22:00:00'
+        condition: time
+      - condition: state
+        entity_id: binary_sensor.anyone_home
+        state: 'on'
+      - below: 13
+        condition: numeric_state
+        entity_id: sensor.garden_temperature
+      sequence:
+      - action: climate.set_preset_mode
+        alias: 'Heating allowed: Comfort'
+        data:
+          preset_mode: comfort
+        target:
+          entity_id:
+          - climate.vtherm_living_room
+          - climate.vtherm_kitchen
+          - climate.vtherm_bedroom_1
+          - climate.vtherm_bedroom_2
+          - climate.vtherm_bedroom_3
+          - climate.vtherm_bedroom_4
+    default:
+    - action: climate.set_preset_mode
+      alias: 'Outside window / away / mild: Frost only'
+      data:
+        preset_mode: frost
       target:
         entity_id:
         - climate.vtherm_living_room
@@ -4359,47 +4448,19 @@
         - climate.vtherm_bedroom_2
         - climate.vtherm_bedroom_3
         - climate.vtherm_bedroom_4
-      data:
-        hvac_mode: 'off'
-      note: Force all VTherm thermostats off immediately on HA restart, before they
-        can restore their pre-restart HVAC mode and briefly call for heat.
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: sensor.season_metrological_2
-        state: summer
-      sequence:
-      - action: select.select_option
-        target:
-          entity_id: select.central_mode
-        data:
-          option: Frost protection
-        note: 'Summer: block normal heating house-wide but keep frost protection as
-          a safety net.'
-    - conditions:
-      - condition: time
-        after: '14:00:00'
-        before: '22:00:00'
-      - condition: numeric_state
-        entity_id: sensor.garden_temperature
-        below: 13
-      sequence:
-      - action: select.select_option
-        target:
-          entity_id: select.central_mode
-        data:
-          option: Auto
-        note: 'Within the 14:00-22:00 daily window and garden colder than 13C: allow
-          normal presence/preset-driven heating.'
-    default:
-    - action: select.select_option
-      target:
-        entity_id: select.central_mode
-      data:
-        option: Frost protection
-      note: 'Before 14:00, at/after 22:00, or garden 13C or warmer: no comfort heating,
-        frost floor only.'
-  mode: single
+  - action: climate.set_hvac_mode
+    alias: Keep every VTherm in Heat so frost protection is always active
+    data:
+      hvac_mode: heat
+    target:
+      entity_id:
+      - climate.vtherm_living_room
+      - climate.vtherm_kitchen
+      - climate.vtherm_bedroom_1
+      - climate.vtherm_bedroom_2
+      - climate.vtherm_bedroom_3
+      - climate.vtherm_bedroom_4
+  mode: restart
 - id: '1788276198429'
   alias: Update Travel Times
   description: ''
