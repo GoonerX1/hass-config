@@ -2478,16 +2478,9 @@
   - trigger: state
     entity_id:
     - camera.g5_bullet_high_resolution_channel
-    to: unavailable
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-    id: G5Bullet
-  - trigger: state
-    entity_id:
-    - camera.g5_bullet_high_resolution_channel
-    to: unknown
+    to:
+    - unavailable
+    - unknown
     for:
       hours: 0
       minutes: 5
@@ -2497,7 +2490,9 @@
     entity_id:
     - device_tracker.unifi_default_1c_0b_8b_da_d3_42
     from:
-    to: unavailable
+    to:
+    - unavailable
+    - unknown
     for:
       hours: 0
       minutes: 5
@@ -2505,13 +2500,7 @@
     id: AIPort
   - trigger: state
     entity_id:
-    - device_tracker.unifi_default_1c_0b_8b_da_d3_42
-    from:
-    to: unknown
-    id: AIPort
-  - trigger: state
-    entity_id:
-    - binary_sensor.g6_entry_doorbell
+    - camera.g6_entry_high_resolution_channel
     from:
     to:
     - unavailable
@@ -2898,10 +2887,15 @@
     - condition: template
       value_template: '{{ trigger.json.alarm.triggers[0].value == ''Karen Meen'' }}'
     - condition: template
-      value_template: '{{ trigger.json.alarm.triggers[0].value == ''Hannah Chapman''
+      value_template: '{{ trigger.json.alarm.triggers[0].value == ''Cleone Chapman''
         }}'
     - condition: template
-      value_template: '{{ trigger.json.alarm.triggers[0].value == ''Adrian Chapman''
+      value_template: '{{ trigger.json.alarm.triggers[0].value == ''Harry Hutley''
+        }}'
+    - condition: template
+      value_template: '{{ trigger.json.alarm.triggers[0].value == ''Sam Hutley'' }}'
+    - condition: template
+      value_template: '{{ trigger.json.alarm.triggers[0].value == ''Freddie Hutley''
         }}'
     enabled: true
   actions:
@@ -4557,9 +4551,13 @@
   mode: queued
 - id: '1790786220643'
   alias: 'Kitchen tablet: battery charge management'
-  description: Turns off the kitchen tablet power socket when the SM-T500 battery
-    reaches 95%, and turns it back on when the battery drops to 50%, to avoid keeping
-    the tablet at 100% permanently.
+  description: 'Keeps the kitchen tablet (SM-T500) between 50% and 95%. Turns the
+    Tablet USB Switch off at 95% only if the tablet''s cable is actually plugged in
+    (Fully Kiosk ''Plugged in'' sensor), so another device on the cable keeps charging.
+    Turns it on at 50%. When the cable is plugged back in while the tablet is already
+    at 95%+, turns the switch off. Note: ''Plugged in'' only reports power, so it
+    reads off whenever the switch is off - unplugs can only be detected while the
+    switch is on.'
   triggers:
   - above: 94
     entity_id: sensor.sm_t500_battery_level
@@ -4569,36 +4567,46 @@
     entity_id: sensor.sm_t500_battery_level
     id: low
     trigger: numeric_state
+  - entity_id: binary_sensor.adrian_s_galaxy_tab_a7_plugged_in
+    for:
+      seconds: 30
+    id: plugged_in
+    to: 'on'
+    trigger: state
   conditions: []
   actions:
   - choose:
-    - conditions:
+    - alias: Tablet at 95%+ and on the cable - stop charging
+      conditions:
       - condition: trigger
-        id: charged
+        id:
+        - charged
+        - plugged_in
+      - above: 94
+        condition: numeric_state
+        entity_id: sensor.sm_t500_battery_level
+      - condition: state
+        entity_id: binary_sensor.adrian_s_galaxy_tab_a7_plugged_in
+        state: 'on'
       - condition: state
         entity_id: switch.tablet_usb_switch
-        state:
-        - 'on'
+        state: 'on'
       sequence:
       - action: switch.turn_off
         target:
-          entity_id:
-          - switch.tablet_usb_switch
-        data: {}
-    - conditions:
+          entity_id: switch.tablet_usb_switch
+    - alias: Battery at 50% - start charging
+      conditions:
       - condition: trigger
         id: low
       - condition: state
         entity_id: switch.tablet_usb_switch
-        state:
-        - 'off'
+        state: 'off'
       sequence:
       - action: switch.turn_on
         target:
-          entity_id:
-          - switch.tablet_usb_switch
-        data: {}
-  mode: single
+          entity_id: switch.tablet_usb_switch
+  mode: queued
 - id: '1791310907719'
   alias: Presence-activated Light
   description: Turns on the living room lamps when presence is detected and 'its dark'

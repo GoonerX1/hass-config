@@ -71,6 +71,14 @@ spotcast:
   sp_key: !secret sp_key
   country: GB #optional, added in 3.6.24
 
+sonos:
+  media_player:
+    advertise_addr: 192.168.34.61
+    hosts:
+      - 192.168.5.59
+      - 192.168.5.151
+      - 192.168.5.204
+
 stream:
 
 tts:
