@@ -143,7 +143,8 @@ text_to_speech_on_sonos:
   use_blueprint:
     path: Talvish/sonos_say.yaml
     input:
-      tts_service_name: google_translate_say
+      tts_service_name: cloud_say
+      tts_language: en-GB
   icon: mdi:speaker-message
   mode: single
 tell_hannah_to_get_out_of_bed:
@@ -151,7 +152,8 @@ tell_hannah_to_get_out_of_bed:
   use_blueprint:
     path: Talvish/sonos_say.yaml
     input:
-      tts_service_name: google_translate_say
+      tts_service_name: cloud_say
+      tts_language: en-GB
   mode: single
   icon: mdi:human-female-dance
 run_hot_water_for_1hr:

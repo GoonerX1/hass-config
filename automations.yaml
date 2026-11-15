@@ -61,14 +61,21 @@
     entity_id: binary_sensor.bathroom_door_ias_zone
     domain: binary_sensor
     trigger: device
+  - trigger: motion.detected
+    target:
+      floor_id: 1st_floor
+    options:
+      behavior: each
+      for: 00:00:00
   conditions:
   - condition: state
     entity_id: input_boolean.its_dark_inside
     state: 'on'
+    enabled: true
   actions:
   - action: light.turn_on
     target:
-      device_id: 3a827eb37776e8edb4b9a3192eba2d11
+      entity_id: light.1st_landing_shelly1minig3_d885ac060a64
     data: {}
   mode: single
 - id: '1580660725532'
@@ -4563,8 +4570,9 @@
     entity_id: sensor.sm_t500_battery_level
     id: charged
     trigger: numeric_state
-  - below: 51
-    entity_id: sensor.sm_t500_battery_level
+  - below: 21
+    entity_id:
+    - sensor.sm_t500_battery_level
     id: low
     trigger: numeric_state
   - entity_id: binary_sensor.adrian_s_galaxy_tab_a7_plugged_in
